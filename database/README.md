@@ -65,3 +65,34 @@ mysql -u root -p -e "source seed.sql"
 7. `availability_requests` &rarr; In-app requests submitted by customers to pharmacies to confirm medicine availability before traveling.
 8. `inventory_audit_logs` &rarr; Traceability log capturing all inventory modifications.
 9. `system_settings` &rarr; Configurable business parameters (e.g., 24-hour stock freshness threshold).
+
+---
+
+## Automated Backup & Restore
+
+Medivolix includes production-ready automated backup and restore scripts with compression, timestamping, GTID safeguards, and automatic 7-day retention policies.
+
+### PowerShell (Windows)
+```powershell
+# Run a full compressed database backup
+powershell -ExecutionPolicy Bypass -File database/backup.ps1
+
+# Restore the most recent backup
+powershell -ExecutionPolicy Bypass -File database/restore.ps1 -Latest
+
+# Restore a specific backup file without prompt
+powershell -ExecutionPolicy Bypass -File database/restore.ps1 -BackupFile database/backups/medivolix_db_backup_XXXX.zip -Force
+```
+
+### Bash (Linux / macOS / Docker Host)
+```bash
+# Run backup (creates .sql.gz)
+./database/backup.sh
+
+# Restore the most recent backup
+./database/restore.sh --latest --force
+
+# Restore a specific file
+./database/restore.sh ./database/backups/medivolix_db_backup_XXXX.sql.gz
+```
+

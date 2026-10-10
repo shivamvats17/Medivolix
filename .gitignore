@@ -60,3 +60,5 @@ medivolix-tomcat-*/
 *.dump
 *.bak
 db_backup/
+database/backups/
+
