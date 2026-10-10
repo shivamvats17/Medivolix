@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Search, Building2, Clock, CheckCircle2, AlertTriangle, ArrowRight, MapPin, ShieldCheck, HeartHandshake } from 'lucide-react';
+import { Search, CheckCircle2, AlertTriangle, ShieldCheck } from 'lucide-react';
 
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');

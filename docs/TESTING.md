@@ -8,13 +8,14 @@ This report summarizes automated and manual test execution across the Medivolix 
 
 | Layer | Test Type | Status | Results |
 | :--- | :--- | :--- | :--- |
-| **Backend** | Unit Tests (JUnit 5) | Passed | 2/2 tests passed (0 failures, 0 errors) |
+| **Backend** | Unit Tests (JUnit 5) | Passed | 18/18 tests passed (0 failures, 0 errors across Distance, Validation, JSON, Password, Freshness) |
 | **Backend** | Maven Compilation | Passed | 48 source files compiled with 0 errors |
 | **Backend** | WAR Packaging | Passed | `target/medivolix.war` generated |
-| **Database** | Schema, Indexes & Seed | Passed | 9 tables, 10 catalog medicines, 7 users |
+| **Database** | Schema, Indexes & Seed | Passed | 9 tables, 10 catalog medicines, 7 users, backup/restore verified |
+| **Frontend** | Static Linting (Oxlint) | Passed | 32 files checked, 0 errors, 0 warnings |
 | **Frontend** | Production Build (Vite) | Passed | 1943 modules transformed, bundle in `dist/` |
 | **Integration**| End-to-End Workflow API | Passed | 9/9 automated integration tests passed |
-| **Browser** | Browser Subagent E2E | Blocked | Failed due to environment Playwright 404 driver download |
+| **Browser** | Browser Subagent E2E | Blocked | External environment Playwright 404 driver download limitation |
 
 ---
 

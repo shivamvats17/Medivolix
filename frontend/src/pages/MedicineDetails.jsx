@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { medicineService } from '../services/medicineService';
 import { requestService } from '../services/requestService';
 import { useAuth } from '../context/AuthContext';
-import { Building2, Phone, MapPin, AlertCircle, ArrowLeft, Send, CheckCircle2, ShieldCheck, Clock } from 'lucide-react';
+import { Building2, Phone, MapPin, AlertCircle, ArrowLeft, Send, CheckCircle2 } from 'lucide-react';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import StatusBadge from '../components/common/StatusBadge';
 import FreshnessBadge from '../components/common/FreshnessBadge';
@@ -12,7 +12,7 @@ import Modal from '../components/common/Modal';
 export default function MedicineDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, isAuthenticated, isCustomer } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);

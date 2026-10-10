@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { requestService } from '../services/requestService';
-import { ClipboardList, Building2, Phone, Search, AlertCircle, RefreshCw, XCircle, CheckCircle2, Clock } from 'lucide-react';
+import { ClipboardList, Building2, Phone, Search, AlertCircle, RefreshCw, XCircle, CheckCircle2 } from 'lucide-react';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import StatusBadge from '../components/common/StatusBadge';
 
@@ -13,21 +13,37 @@ export default function UserDashboard() {
   const [error, setError] = useState(null);
   const [actionMessage, setActionMessage] = useState(null);
 
-  useEffect(() => {
-    loadRequests();
-  }, []);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  const loadRequests = async () => {
+  useEffect(() => {
+    let ignore = false;
+    async function fetchRequests() {
+      try {
+        const data = await requestService.getMyRequests();
+        if (!ignore) {
+          setRequests(data || []);
+        }
+      } catch (err) {
+        if (!ignore) {
+          setError(err.message || 'Failed to load availability inquiries');
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    }
+
+    fetchRequests();
+    return () => {
+      ignore = true;
+    };
+  }, [refreshTrigger]);
+
+  const reloadRequests = () => {
     setLoading(true);
     setError(null);
-    try {
-      const data = await requestService.getMyRequests();
-      setRequests(data || []);
-    } catch (err) {
-      setError(err.message || 'Failed to load availability inquiries');
-    } finally {
-      setLoading(false);
-    }
+    setRefreshTrigger((prev) => prev + 1);
   };
 
   const handleCancelRequest = async (requestId) => {
@@ -37,7 +53,7 @@ export default function UserDashboard() {
     try {
       await requestService.cancelRequest(requestId);
       setActionMessage('Inquiry cancelled successfully.');
-      loadRequests();
+      reloadRequests();
       setTimeout(() => setActionMessage(null), 3000);
     } catch (err) {
       alert(err.message || 'Could not cancel inquiry');
@@ -62,7 +78,7 @@ export default function UserDashboard() {
             <Link to="/search" className="btn btn-primary btn-sm">
               <Search size={15} /> Search Medicines
             </Link>
-            <button onClick={loadRequests} className="btn btn-secondary btn-sm" title="Refresh list">
+            <button onClick={reloadRequests} className="btn btn-secondary btn-sm" title="Refresh list">
               <RefreshCw size={15} /> Refresh
             </button>
           </div>

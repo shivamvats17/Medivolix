@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { adminService } from '../services/adminService';
 import {
-  ShieldCheck, Building2, Users, FileText, CheckCircle2,
-  XCircle, AlertCircle, RefreshCw, AlertTriangle, Layers
+  ShieldCheck, Building2, Users, CheckCircle2,
+  XCircle, AlertCircle, RefreshCw
 } from 'lucide-react';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
@@ -18,27 +18,43 @@ export default function AdminDashboard() {
   const [error, setError] = useState(null);
   const [actionSuccess, setActionSuccess] = useState(null);
 
-  useEffect(() => {
-    loadAdminData();
-  }, []);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  const loadAdminData = async () => {
+  useEffect(() => {
+    let ignore = false;
+    async function fetchAdminData() {
+      try {
+        const [stats, pharms, users] = await Promise.all([
+          adminService.getOverview(),
+          adminService.getPharmacies(),
+          adminService.getUsers(),
+        ]);
+        if (!ignore) {
+          setOverview(stats);
+          setPharmacies(pharms || []);
+          setUsersList(users || []);
+        }
+      } catch (err) {
+        if (!ignore) {
+          setError(err.message || 'Failed to load administrator data');
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    }
+
+    fetchAdminData();
+    return () => {
+      ignore = true;
+    };
+  }, [refreshTrigger]);
+
+  const reloadAdminData = () => {
     setLoading(true);
     setError(null);
-    try {
-      const [stats, pharms, users] = await Promise.all([
-        adminService.getOverview(),
-        adminService.getPharmacies(),
-        adminService.getUsers(),
-      ]);
-      setOverview(stats);
-      setPharmacies(pharms || []);
-      setUsersList(users || []);
-    } catch (err) {
-      setError(err.message || 'Failed to load administrator data');
-    } finally {
-      setLoading(false);
-    }
+    setRefreshTrigger((prev) => prev + 1);
   };
 
   const handleApprovePharmacy = async (pharmacyId) => {
@@ -46,7 +62,7 @@ export default function AdminDashboard() {
     try {
       await adminService.approvePharmacy(pharmacyId);
       setActionSuccess('Pharmacy approved successfully.');
-      loadAdminData();
+      reloadAdminData();
       setTimeout(() => setActionSuccess(null), 3000);
     } catch (err) {
       alert(err.message || 'Approval failed');
@@ -58,7 +74,7 @@ export default function AdminDashboard() {
     try {
       await adminService.suspendPharmacy(pharmacyId);
       setActionSuccess('Pharmacy suspended.');
-      loadAdminData();
+      reloadAdminData();
       setTimeout(() => setActionSuccess(null), 3000);
     } catch (err) {
       alert(err.message || 'Suspension failed');
@@ -82,7 +98,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <button onClick={loadAdminData} className="btn btn-secondary btn-sm">
+          <button onClick={reloadAdminData} className="btn btn-secondary btn-sm">
             <RefreshCw size={15} /> Refresh Metrics
           </button>
         </div>

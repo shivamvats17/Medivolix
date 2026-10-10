@@ -23,7 +23,7 @@ export async function request(endpoint, options = {}) {
       if (parsed?.id) {
         defaultHeaders['Authorization'] = `Bearer ${parsed.id}`;
       }
-    } catch (e) {
+    } catch {
       // ignore
     }
   }

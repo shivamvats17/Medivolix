@@ -4,7 +4,7 @@ import { inventoryService } from '../services/inventoryService';
 import { medicineService } from '../services/medicineService';
 import {
   Building2, Plus, AlertTriangle, Calendar, ClipboardCheck, History,
-  Search, CheckCircle2, XCircle, RefreshCw, AlertCircle, Edit, ShieldAlert
+  Search, CheckCircle2, RefreshCw, AlertCircle, Edit
 } from 'lucide-react';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import StatusBadge from '../components/common/StatusBadge';
@@ -45,34 +45,50 @@ export default function PharmacyDashboard() {
   const [newStatus, setNewStatus] = useState('CONFIRMED');
   const [pharmacyNotes, setPharmacyNotes] = useState('');
 
-  useEffect(() => {
-    loadAllData();
-  }, []);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  const loadAllData = async () => {
+  useEffect(() => {
+    let ignore = false;
+    async function fetchAllData() {
+      try {
+        const [invData, lowData, expData, reqData, auditData, catalogData] = await Promise.all([
+          inventoryService.getInventory(),
+          inventoryService.getLowStock(),
+          inventoryService.getExpiringBatches(),
+          inventoryService.getPharmacyRequests(),
+          inventoryService.getAuditLogs(),
+          medicineService.getAllMedicines(),
+        ]);
+
+        if (!ignore) {
+          setInventory(invData || []);
+          setLowStock(lowData || []);
+          setExpiringBatches(expData || []);
+          setRequests(reqData || []);
+          setAuditLogs(auditData || []);
+          setAllMedicines(catalogData || []);
+        }
+      } catch (err) {
+        if (!ignore) {
+          setError(err.message || 'Failed to load pharmacy dashboard data');
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    }
+
+    fetchAllData();
+    return () => {
+      ignore = true;
+    };
+  }, [refreshTrigger]);
+
+  const reloadAllData = () => {
     setLoading(true);
     setError(null);
-    try {
-      const [invData, lowData, expData, reqData, auditData, catalogData] = await Promise.all([
-        inventoryService.getInventory(),
-        inventoryService.getLowStock(),
-        inventoryService.getExpiringBatches(),
-        inventoryService.getPharmacyRequests(),
-        inventoryService.getAuditLogs(),
-        medicineService.getAllMedicines(),
-      ]);
-
-      setInventory(invData || []);
-      setLowStock(lowData || []);
-      setExpiringBatches(expData || []);
-      setRequests(reqData || []);
-      setAuditLogs(auditData || []);
-      setAllMedicines(catalogData || []);
-    } catch (err) {
-      setError(err.message || 'Failed to load pharmacy dashboard data');
-    } finally {
-      setLoading(false);
-    }
+    setRefreshTrigger((prev) => prev + 1);
   };
 
   const handleSaveInventory = async (e) => {
@@ -93,7 +109,7 @@ export default function PharmacyDashboard() {
       setSuccessMessage('Inventory record updated successfully.');
       setAddModalOpen(false);
       resetAddForm();
-      loadAllData();
+      reloadAllData();
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
       alert(err.message || 'Failed to save inventory item');
@@ -116,7 +132,7 @@ export default function PharmacyDashboard() {
     try {
       await inventoryService.markUnavailable(invId);
       setSuccessMessage('Medicine marked as unavailable.');
-      loadAllData();
+      reloadAllData();
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
       alert(err.message || 'Failed to update item');
@@ -132,7 +148,7 @@ export default function PharmacyDashboard() {
       setSuccessMessage(`Inquiry #${statusModalReq.id} marked as ${newStatus}.`);
       setStatusModalReq(null);
       setPharmacyNotes('');
-      loadAllData();
+      reloadAllData();
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
       alert(err.message || 'Failed to update inquiry status');
@@ -149,6 +165,10 @@ export default function PharmacyDashboard() {
       item.genericName?.toLowerCase().includes(term)
     );
   });
+
+  if (loading && inventory.length === 0) {
+    return <LoadingSpinner message="Loading pharmacy dashboard..." />;
+  }
 
   return (
     <div className="container" style={{ padding: '32px 16px' }}>
@@ -174,7 +194,7 @@ export default function PharmacyDashboard() {
             >
               <Plus size={16} /> Add / Update Stock
             </button>
-            <button onClick={loadAllData} className="btn btn-secondary" title="Refresh dashboard data">
+            <button onClick={reloadAllData} className="btn btn-secondary" title="Refresh dashboard data">
               <RefreshCw size={16} /> Refresh
             </button>
           </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { medicineService } from '../services/medicineService';
-import { Search, MapPin, AlertCircle, Building2, Phone, X, Filter, Navigation, ArrowRight } from 'lucide-react';
+import { Search, MapPin, AlertCircle, Building2, X, Filter, Navigation, ArrowRight } from 'lucide-react';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import StatusBadge from '../components/common/StatusBadge';
 import FreshnessBadge from '../components/common/FreshnessBadge';
@@ -24,34 +24,42 @@ export default function SearchMedicines() {
   const [filterType, setFilterType] = useState('ALL');
 
   useEffect(() => {
-    executeSearch(initialQuery);
-  }, [initialQuery]);
-
-  const executeSearch = async (searchQuery) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const lat = userLocation?.lat || null;
-      const lng = userLocation?.lng || null;
-      const data = await medicineService.searchMedicines(searchQuery, lat, lng);
-      setResults(data || []);
-    } catch (err) {
-      setError(err.message || 'Error communicating with medicine catalog service');
-    } finally {
-      setLoading(false);
+    let ignore = false;
+    async function runSearch() {
+      setLoading(true);
+      setError(null);
+      try {
+        const lat = userLocation?.lat || null;
+        const lng = userLocation?.lng || null;
+        const data = await medicineService.searchMedicines(initialQuery, lat, lng);
+        if (!ignore) {
+          setResults(data || []);
+        }
+      } catch (err) {
+        if (!ignore) {
+          setError(err.message || 'Error communicating with medicine catalog service');
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
     }
-  };
+
+    runSearch();
+    return () => {
+      ignore = true;
+    };
+  }, [initialQuery, userLocation]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setSearchParams(query.trim() ? { q: query.trim() } : {});
-    executeSearch(query.trim());
   };
 
   const handleClear = () => {
     setQuery('');
     setSearchParams({});
-    executeSearch('');
   };
 
   const requestLocation = () => {
@@ -66,10 +74,8 @@ export default function SearchMedicines() {
         const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         setUserLocation(loc);
         setLocationLoading(false);
-        // Re-execute search with user coordinates to compute Haversine distance
-        executeSearch(query);
       },
-      (err) => {
+      (_err) => {
         setLocationLoading(false);
         setLocationError('Location permission denied or unavailable. You can still search normally.');
       },

@@ -1,3 +1,4 @@
+/* eslint-disable react/only-export-components */
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authService } from '../services/authService';
 
@@ -24,7 +25,7 @@ export function AuthProvider({ children }) {
           setUser(freshUser);
           localStorage.setItem('medivolix_user', JSON.stringify(freshUser));
         }
-      } catch (err) {
+      } catch {
         // Not logged in or session expired
         if (isMounted) {
           setUser(null);

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Search, Building2, User, LogOut, ShieldCheck, ClipboardList, Menu, X } from 'lucide-react';
+import { Search, Building2, LogOut, ShieldCheck, ClipboardList, Menu, X } from 'lucide-react';
 
 export default function Navbar() {
   const { user, isAuthenticated, isCustomer, isPharmacyAdmin, isSystemAdmin, logout } = useAuth();

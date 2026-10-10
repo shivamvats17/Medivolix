@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { pharmacyService } from '../services/pharmacyService';
-import { Building2, Phone, Mail, MapPin, Clock, ShieldCheck, ArrowLeft, AlertCircle, Search } from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, ShieldCheck, ArrowLeft, AlertCircle, Search } from 'lucide-react';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import StatusBadge from '../components/common/StatusBadge';
 import FreshnessBadge from '../components/common/FreshnessBadge';

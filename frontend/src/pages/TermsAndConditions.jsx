@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FileText, ArrowLeft, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { FileText, ArrowLeft } from 'lucide-react';
 
 export default function TermsAndConditions() {
   return (

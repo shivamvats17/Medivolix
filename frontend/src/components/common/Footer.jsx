@@ -2,6 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { AlertCircle, Shield, FileText } from 'lucide-react';
 
+const currentYear = new Date().getFullYear();
+
 export default function Footer() {
   return (
     <footer style={{
@@ -116,7 +118,7 @@ export default function Footer() {
           color: '#64748b',
         }}>
           <div>
-            &copy; {new Date().getFullYear()} Medivolix. All rights reserved.
+            &copy; {currentYear} Medivolix. All rights reserved.
           </div>
           <div>
             Demonstration full-stack project built with React, Core Java Servlets, and MySQL.
