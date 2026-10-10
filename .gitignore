@@ -1,0 +1,62 @@
+# ==============================================================================
+# Medivolix Project .gitignore
+# Excludes dependencies, build outputs, environment secrets, and IDE files.
+# Never ignore .env.example files.
+# ==============================================================================
+
+# Node.js / Frontend
+node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/.cache/
+frontend/*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Java / Maven / Backend
+backend/target/
+backend/tomcat.*/
+*.class
+*.war
+*.ear
+*.jar
+!backend/src/main/resources/*.jar
+
+# Secrets and Environment Variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+backend/.env
+frontend/.env
+!*.env.example
+
+# IDE & Editor Configuration
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/launch.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*~
+.DS_Store
+Thumbs.db
+
+# Logs & Temporary Files
+logs/
+*.log
+tmp/
+temp/
+medivolix-tomcat-*/
+
+# Database Backups & Dumps
+*.sql.gz
+*.dump
+*.bak
+db_backup/

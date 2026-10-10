@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /pharmacy-dashboard
+Disallow: /user-dashboard
+
+Sitemap: https://medivolix.example.com/sitemap.xml
