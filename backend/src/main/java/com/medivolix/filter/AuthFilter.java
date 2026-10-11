@@ -79,6 +79,9 @@ public class AuthFilter implements Filter {
                path.startsWith("/api/auth/register") ||
                path.startsWith("/api/auth/logout") ||
                path.startsWith("/api/medicines") ||
+               path.startsWith("/api/health") ||
+               path.startsWith("/api/openapi.json") ||
+               path.startsWith("/api/system") ||
                (path.startsWith("/api/pharmacies") && !path.contains("/admin/"));
     }
 

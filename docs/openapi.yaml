@@ -1,0 +1,335 @@
+openapi: 3.0.3
+info:
+  title: Medivolix REST API
+  description: Enterprise-grade REST API for Medivolix - Medicine Availability & Participating Pharmacy Finder.
+  version: 1.0.0
+  contact:
+    name: Medivolix Engineering Team
+    email: dev@medivolix.com
+  license:
+    name: MIT License
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8080/api
+    description: Embedded Tomcat Servlet Container
+  - url: /api
+    description: Relative Vite Development Proxy
+
+tags:
+  - name: System
+    description: Platform health monitoring and OpenAPI specifications
+  - name: Authentication
+    description: Customer registration, role-based login, and session management
+  - name: Medicines
+    description: Medicine catalog search with Haversine distance and freshness evaluation
+  - name: Pharmacies
+    description: Directory of licensed pharmacies and store inventory catalogs
+  - name: Pharmacy Inventory
+    description: Pharmacy stock updates, batch tracking, and audit trail
+  - name: Availability Inquiries
+    description: Patient medicine availability confirmation requests and pharmacy response lifecycle
+  - name: Administration
+    description: System administrator governance, pharmacy approvals, and metrics
+
+paths:
+  /health:
+    get:
+      tags: [System]
+      summary: System Health & Database Pool Status
+      responses:
+        "200":
+          description: Healthy operational status
+
+  /openapi.json:
+    get:
+      tags: [System]
+      summary: OpenAPI 3.0 Specification Document
+      responses:
+        "200":
+          description: Specification in JSON format
+
+  /auth/register:
+    post:
+      tags: [Authentication]
+      summary: Register a new customer account
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad request
+
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: Authenticate user session
+      responses:
+        "200":
+          description: Login successful
+        "401":
+          description: Invalid credentials
+
+  /auth/logout:
+    post:
+      tags: [Authentication]
+      summary: Terminate authenticated session
+      responses:
+        "200":
+          description: Logged out
+
+  /auth/me:
+    get:
+      tags: [Authentication]
+      summary: Get authenticated user profile
+      responses:
+        "200":
+          description: Current user profile
+        "401":
+          description: Unauthorized
+
+  /medicines/search:
+    get:
+      tags: [Medicines]
+      summary: Search medicines and participating pharmacy stock
+      parameters:
+        - name: q
+          in: query
+          schema: { type: string }
+        - name: lat
+          in: query
+          schema: { type: number, format: double }
+        - name: lng
+          in: query
+          schema: { type: number, format: double }
+      responses:
+        "200":
+          description: Search results
+
+  /medicines/{id}:
+    get:
+      tags: [Medicines]
+      summary: Get medicine specifications and pharmacy stock
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Medicine details
+        "404":
+          description: Not found
+
+  /medicines:
+    get:
+      tags: [Medicines]
+      summary: List all catalog medicines
+      responses:
+        "200":
+          description: Medicine catalog
+
+  /pharmacies:
+    get:
+      tags: [Pharmacies]
+      summary: List approved participating pharmacies
+      responses:
+        "200":
+          description: Pharmacy list
+
+  /pharmacies/{id}:
+    get:
+      tags: [Pharmacies]
+      summary: Get pharmacy details and contact info
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Pharmacy details
+
+  /pharmacies/{id}/medicines:
+    get:
+      tags: [Pharmacies]
+      summary: Get medicines available at a pharmacy
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Inventory items
+
+  /pharmacy/inventory:
+    get:
+      tags: [Pharmacy Inventory]
+      summary: List pharmacy inventory items (Admin)
+      responses:
+        "200":
+          description: Inventory list
+    post:
+      tags: [Pharmacy Inventory]
+      summary: Create or update pharmacy inventory item
+      responses:
+        "200":
+          description: Inventory saved
+
+  /pharmacy/inventory/{id}/unavailable:
+    post:
+      tags: [Pharmacy Inventory]
+      summary: Mark item as out of stock / unavailable
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Marked unavailable
+
+  /pharmacy/inventory/batch:
+    post:
+      tags: [Pharmacy Inventory]
+      summary: Record a new batch for an inventory item
+      responses:
+        "201":
+          description: Batch recorded
+
+  /pharmacy/inventory/low-stock:
+    get:
+      tags: [Pharmacy Inventory]
+      summary: Get items below low-stock threshold
+      responses:
+        "200":
+          description: Low stock items
+
+  /pharmacy/inventory/expiry:
+    get:
+      tags: [Pharmacy Inventory]
+      summary: Get batches approaching expiry
+      responses:
+        "200":
+          description: Batches expiring <= 45 days
+
+  /pharmacy/inventory/audit:
+    get:
+      tags: [Pharmacy Inventory]
+      summary: Get inventory audit trail
+      responses:
+        "200":
+          description: Audit log records
+
+  /availability-requests:
+    post:
+      tags: [Availability Inquiries]
+      summary: Submit medicine availability inquiry
+      responses:
+        "201":
+          description: Request created
+
+  /availability-requests/my:
+    get:
+      tags: [Availability Inquiries]
+      summary: List current customer inquiries
+      responses:
+        "200":
+          description: Inquiries list
+
+  /availability-requests/{id}:
+    get:
+      tags: [Availability Inquiries]
+      summary: Get availability inquiry details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Request details
+
+  /availability-requests/{id}/cancel:
+    post:
+      tags: [Availability Inquiries]
+      summary: Cancel pending availability inquiry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Cancelled
+
+  /pharmacy/requests:
+    get:
+      tags: [Availability Inquiries]
+      summary: List inquiries received by pharmacy
+      responses:
+        "200":
+          description: Inquiries
+
+  /pharmacy/requests/{id}/status:
+    post:
+      tags: [Availability Inquiries]
+      summary: Update inquiry status and pharmacist response
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Updated
+
+  /admin/overview:
+    get:
+      tags: [Administration]
+      summary: Platform operations overview & metrics
+      responses:
+        "200":
+          description: Metrics
+
+  /admin/users:
+    get:
+      tags: [Administration]
+      summary: List all system users
+      responses:
+        "200":
+          description: Users
+
+  /admin/pharmacies:
+    get:
+      tags: [Administration]
+      summary: List all pharmacies
+      responses:
+        "200":
+          description: Pharmacies
+
+  /admin/pharmacies/{id}/approve:
+    post:
+      tags: [Administration]
+      summary: Approve a pharmacy license
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Approved
+
+  /admin/pharmacies/{id}/suspend:
+    post:
+      tags: [Administration]
+      summary: Suspend a pharmacy
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Suspended

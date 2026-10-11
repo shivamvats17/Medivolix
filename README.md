@@ -68,6 +68,7 @@ Medivolix/
 |   |   |   |-- UserDashboard.jsx    # Patient inquiry tracking & cancellation
 |   |   |   |-- PharmacyDashboard.jsx# Inventory, low-stock, expiry, & inquiry handling
 |   |   |   |-- AdminDashboard.jsx   # Real metrics, pharmacy approval, user list
+|   |   |   |-- ApiExplorer.jsx      # Interactive OpenAPI 3.0 REST tester & explorer
 |   |   |   |-- PrivacyPolicy.jsx    # Transparency & governance legal disclosure
 |   |   |   |-- TermsAndConditions.jsx# Platform limitations & operating terms
 |   |   |   |-- NotFound.jsx         # 404 error page
@@ -110,6 +111,7 @@ Medivolix/
 |   |-- ARCHITECTURE.md              # Layered architectural design
 |   |-- DATABASE_SCHEMA.md           # ER diagram and data dictionary
 |   |-- API_DOCUMENTATION.md         # Full REST endpoints reference
+|   |-- openapi.yaml                 # Formal OpenAPI 3.0 specification definition
 |   |-- INSTALLATION_GUIDE.md        # Beginner installation walkthrough
 |   |-- TROUBLESHOOTING.md           # Common errors and resolutions
 |   |-- SECURITY.md                  # Security controls & BCrypt implementation
@@ -223,7 +225,17 @@ All seed passwords are encrypted using BCrypt (`$2a$10$...`) in MySQL. For conve
 
 ---
 
-## 8. Pre-Launch Verification Checklist
+## 8. Interactive REST API Explorer & OpenAPI 3.0
+
+Medivolix includes a built-in interactive developer workbench and formal OpenAPI 3.0 specification:
+- **In-App API Explorer**: Navigate to `http://localhost:5173/api-docs` (supports real-time parameter tweaking, live HTTP testing, auth preset switcher, cURL generation, and JSON inspection).
+- **OpenAPI 3.0 Specification (JSON)**: Hosted live at `http://localhost:8080/api/openapi.json` and bundled in `frontend/public/openapi.json`.
+- **OpenAPI 3.0 Specification (YAML)**: Located in [`docs/openapi.yaml`](docs/openapi.yaml).
+- **Platform Diagnostics**: Live HikariCP and JVM diagnostic health check at `http://localhost:8080/api/health`.
+
+---
+
+## 9. Pre-Launch Verification Checklist
 
 - [x] React frontend works with responsive layout and accessible form validation.
 - [x] Core Java Servlets backend runs without external Spring frameworks.
@@ -233,6 +245,7 @@ All seed passwords are encrypted using BCrypt (`$2a$10$...`) in MySQL. For conve
 - [x] Cross-pharmacy access restrictions strictly enforced on the server.
 - [x] Production WAR file builds successfully (`target/medivolix.war`).
 - [x] Production React bundle builds successfully (`frontend/dist`).
+- [x] OpenAPI 3.0 specification and interactive REST API Explorer (`/api-docs`) implemented.
 - [x] Original SVG favicon loads and meta descriptions configured.
 - [x] Privacy Policy (`/privacy-policy`) and Terms and Conditions (`/terms-and-conditions`) available.
 - [x] Transparent freshness disclaimers implemented; no fake metrics or reviews.
@@ -240,6 +253,6 @@ All seed passwords are encrypted using BCrypt (`$2a$10$...`) in MySQL. For conve
 
 ---
 
-## 9. License
+## 10. License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

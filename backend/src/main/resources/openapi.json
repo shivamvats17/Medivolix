@@ -1,0 +1,1228 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Medivolix REST API",
+    "description": "Enterprise-grade REST API for Medivolix: Medicine Availability & Participating Pharmacy Finder. Connects citizens, community pharmacies, and regulatory administrators with real-time stock transparency, Haversine geographic proximity, and automated 24-hour freshness tracking.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Medivolix Engineering Team",
+      "email": "dev@medivolix.com"
+    },
+    "license": {
+      "name": "MIT License",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/api",
+      "description": "Local Tomcat / Jakarta Servlet Backend"
+    },
+    {
+      "url": "/api",
+      "description": "Vite Development Proxy (Relative Path)"
+    }
+  ],
+  "tags": [
+    { "name": "System", "description": "Platform health monitoring and OpenAPI specifications" },
+    { "name": "Authentication", "description": "Customer registration, role-based login, and session management" },
+    { "name": "Medicines", "description": "Medicine catalog search with Haversine distance and freshness evaluation" },
+    { "name": "Pharmacies", "description": "Directory of licensed pharmacies and store inventory catalogs" },
+    { "name": "Pharmacy Inventory", "description": "Pharmacy stock updates, batch tracking, and audit trail" },
+    { "name": "Availability Inquiries", "description": "Patient medicine availability confirmation requests and pharmacy response lifecycle" },
+    { "name": "Administration", "description": "System administrator governance, pharmacy approvals, and metrics" }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": ["System"],
+        "summary": "System Health & Database Pool Status",
+        "description": "Returns application operational status, HikariCP JDBC connection health, and JVM memory diagnostics.",
+        "operationId": "getHealthStatus",
+        "responses": {
+          "200": {
+            "description": "System is operational and database connection is healthy",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HealthApiResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/openapi.json": {
+      "get": {
+        "tags": ["System"],
+        "summary": "OpenAPI 3.0 Specification Document",
+        "description": "Retrieves the complete OpenAPI 3.0 specification definition in JSON format.",
+        "operationId": "getOpenApiSpec",
+        "responses": {
+          "200": {
+            "description": "OpenAPI 3.0 specification document"
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Register a new customer account",
+        "description": "Creates a new patient/customer account and establishes an authenticated session.",
+        "operationId": "registerUser",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RegisterRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Account created successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserApiResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input or email already registered",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorApiResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Authenticate user session",
+        "description": "Validates email and salted BCrypt password hash. Initiates HTTP session with cookie.",
+        "operationId": "loginUser",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LoginRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserApiResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing credentials",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorApiResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid email or password",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorApiResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Terminate authenticated session",
+        "description": "Invalidates the current HTTP session cookie.",
+        "operationId": "logoutUser",
+        "security": [{ "cookieAuth": [] }, { "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Successfully logged out",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GenericApiResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "tags": ["Authentication"],
+        "summary": "Get authenticated user profile",
+        "description": "Retrieves the currently logged-in user profile, role, and affiliated pharmacy ID.",
+        "operationId": "getCurrentUser",
+        "security": [{ "cookieAuth": [] }, { "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "User profile returned",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserApiResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorApiResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/medicines/search": {
+      "get": {
+        "tags": ["Medicines"],
+        "summary": "Search medicines and participating pharmacy stock",
+        "description": "Searches medicines by brand or generic name. If latitude and longitude are supplied, calculates Haversine proximity to reporting pharmacies and evaluates 24-hour stock freshness.",
+        "operationId": "searchMedicines",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Search term matching brand name, generic composition, or therapeutic category (e.g. 'augmentin', 'paracetamol')",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "lat",
+            "in": "query",
+            "description": "User latitude (e.g., 12.9719)",
+            "required": false,
+            "schema": { "type": "number", "format": "double" }
+          },
+          {
+            "name": "lng",
+            "in": "query",
+            "description": "User longitude (e.g., 77.6412)",
+            "required": false,
+            "schema": { "type": "number", "format": "double" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matching medicines with participating pharmacy availability",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MedicineSearchApiResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/medicines/{id}": {
+      "get": {
+        "tags": ["Medicines"],
+        "summary": "Get medicine specifications and pharmacy stock",
+        "description": "Retrieves detailed specifications for a specific medicine along with all reporting approved pharmacies.",
+        "operationId": "getMedicineById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Medicine primary key ID",
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "lat",
+            "in": "query",
+            "required": false,
+            "description": "User latitude for distance calculation",
+            "schema": { "type": "number", "format": "double" }
+          },
+          {
+            "name": "lng",
+            "in": "query",
+            "required": false,
+            "description": "User longitude for distance calculation",
+            "schema": { "type": "number", "format": "double" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Medicine specifications and stock availability",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MedicineDetailApiResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Medicine not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorApiResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/medicines": {
+      "get": {
+        "tags": ["Medicines"],
+        "summary": "List all catalog medicines",
+        "description": "Retrieves the standard catalog of all recognized medications in Medivolix.",
+        "operationId": "getAllMedicines",
+        "responses": {
+          "200": {
+            "description": "Catalog medicine list",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MedicineListApiResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pharmacies": {
+      "get": {
+        "tags": ["Pharmacies"],
+        "summary": "List approved participating pharmacies",
+        "description": "Returns verified, active community pharmacies. If coordinates are provided, pharmacies are sorted by proximity.",
+        "operationId": "getPharmacies",
+        "parameters": [
+          {
+            "name": "lat",
+            "in": "query",
+            "required": false,
+            "description": "User latitude",
+            "schema": { "type": "number", "format": "double" }
+          },
+          {
+            "name": "lng",
+            "in": "query",
+            "required": false,
+            "description": "User longitude",
+            "schema": { "type": "number", "format": "double" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of approved pharmacies",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PharmacyListApiResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pharmacies/{id}": {
+      "get": {
+        "tags": ["Pharmacies"],
+        "summary": "Get pharmacy details and contact info",
+        "description": "Retrieves store profile, license status, phone, address, and operating hours.",
+        "operationId": "getPharmacyById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Pharmacy primary key ID",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pharmacy details",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PharmacyDetailApiResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Pharmacy not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorApiResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pharmacies/{id}/medicines": {
+      "get": {
+        "tags": ["Pharmacies"],
+        "summary": "Get medicines available at a pharmacy",
+        "description": "Returns the inventory stock catalog reported by the specified pharmacy.",
+        "operationId": "getPharmacyInventoryCatalog",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Pharmacy ID",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pharmacy inventory items",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PharmacyInventoryListApiResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pharmacy/inventory": {
+      "get": {
+        "tags": ["Pharmacy Inventory"],
+        "summary": "List pharmacy inventory items (Admin)",
+        "description": "Retrieves all inventory items for the authenticated pharmacy administrator's pharmacy.",
+        "operationId": "getMyPharmacyInventory",
+        "security": [{ "cookieAuth": [] }, { "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Inventory list",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PharmacyInventoryListApiResponse" }
+              }
+            }
+          },
+          "401": { "description": "Authentication required" },
+          "403": { "description": "Pharmacy administrator role required" }
+        }
+      },
+      "post": {
+        "tags": ["Pharmacy Inventory"],
+        "summary": "Create or update pharmacy inventory item",
+        "description": "Saves stock quantity, unit price, availability flag, and creates an initial batch if batch details are supplied.",
+        "operationId": "saveOrUpdateInventoryItem",
+        "security": [{ "cookieAuth": [] }, { "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/InventoryItemRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Inventory item saved successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PharmacyInventoryItemApiResponse" }
+              }
+            }
+          },
+          "400": { "description": "Invalid input data" },
+          "403": { "description": "Forbidden" }
+        }
+      }
+    },
+    "/pharmacy/inventory/{id}/unavailable": {
+      "post": {
+        "tags": ["Pharmacy Inventory"],
+        "summary": "Mark item as out of stock / unavailable",
+        "description": "Sets stock quantity to 0 and flags item as unavailable, logging an audit adjustment.",
+        "operationId": "markInventoryUnavailable",
+        "security": [{ "cookieAuth": [] }, { "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Inventory record ID",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Item marked unavailable",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GenericApiResponse" }
+              }
+            }
+          },
+          "400": { "description": "Item not found or belongs to another pharmacy" }
+        }
+      }
+    },
+    "/pharmacy/inventory/batch": {
+      "post": {
+        "tags": ["Pharmacy Inventory"],
+        "summary": "Record a new batch for an inventory item",
+        "description": "Appends a manufacturer batch number, batch quantity, and expiration date. Increments overall stock quantity.",
+        "operationId": "addInventoryBatch",
+        "security": [{ "cookieAuth": [] }, { "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/BatchRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Batch recorded successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/BatchApiResponse" }
+              }
+            }
+          },
+          "400": { "description": "Validation failed" }
+        }
+      }
+    },
+    "/pharmacy/inventory/low-stock": {
+      "get": {
+        "tags": ["Pharmacy Inventory"],
+        "summary": "Get items below low-stock threshold",
+        "description": "Returns items where stockQuantity is less than or equal to lowStockThreshold.",
+        "operationId": "getLowStockItems",
+        "security": [{ "cookieAuth": [] }, { "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Low stock items",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PharmacyInventoryListApiResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pharmacy/inventory/expiry": {
+      "get": {
+        "tags": ["Pharmacy Inventory"],
+        "summary": "Get batches approaching expiry",
+        "description": "Returns all non-expired batches with expiration dates within the next 45 days.",
+        "operationId": "getExpiringBatches",
+        "security": [{ "cookieAuth": [] }, { "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Approaching expiry batches",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/BatchListApiResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pharmacy/inventory/audit": {
+      "get": {
+        "tags": ["Pharmacy Inventory"],
+        "summary": "Get inventory audit trail",
+        "description": "Returns immutable audit records of stock adjustments, batch additions, and availability status updates.",
+        "operationId": "getInventoryAuditLogs",
+        "security": [{ "cookieAuth": [] }, { "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Audit trail entries",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AuditLogListApiResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/availability-requests": {
+      "post": {
+        "tags": ["Availability Inquiries"],
+        "summary": "Submit medicine availability inquiry",
+        "description": "Allows a customer to inquire whether a participating pharmacy currently has specific medication available before travelling.",
+        "operationId": "createAvailabilityRequest",
+        "security": [{ "cookieAuth": [] }, { "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateAvailabilityRequestDto" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Availability inquiry submitted",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AvailabilityRequestApiResponse" }
+              }
+            }
+          },
+          "400": { "description": "Validation failed" },
+          "401": { "description": "Authentication required" }
+        }
+      }
+    },
+    "/availability-requests/my": {
+      "get": {
+        "tags": ["Availability Inquiries"],
+        "summary": "List current customer's inquiries",
+        "description": "Returns all availability inquiries submitted by the logged-in customer.",
+        "operationId": "getMyRequests",
+        "security": [{ "cookieAuth": [] }, { "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of customer inquiries",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AvailabilityRequestListApiResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/availability-requests/{id}": {
+      "get": {
+        "tags": ["Availability Inquiries"],
+        "summary": "Get availability inquiry details",
+        "description": "Retrieves single inquiry details. Enforces strict privacy checks to ensure only request owner or pharmacy can inspect.",
+        "operationId": "getRequestById",
+        "security": [{ "cookieAuth": [] }, { "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Inquiry ID",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Inquiry record",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AvailabilityRequestApiResponse" }
+              }
+            }
+          },
+          "403": { "description": "Access denied" },
+          "404": { "description": "Request not found" }
+        }
+      }
+    },
+    "/availability-requests/{id}/cancel": {
+      "post": {
+        "tags": ["Availability Inquiries"],
+        "summary": "Cancel pending availability inquiry",
+        "description": "Allows the customer to cancel a request while it is still in PENDING status.",
+        "operationId": "cancelAvailabilityRequest",
+        "security": [{ "cookieAuth": [] }, { "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Inquiry ID",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Inquiry cancelled successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GenericApiResponse" }
+              }
+            }
+          },
+          "400": { "description": "Request cannot be cancelled (e.g. already confirmed or not owner)" }
+        }
+      }
+    },
+    "/pharmacy/requests": {
+      "get": {
+        "tags": ["Availability Inquiries"],
+        "summary": "List inquiries received by pharmacy",
+        "description": "Retrieves incoming customer inquiries directed to the authenticated pharmacy administrator's pharmacy.",
+        "operationId": "getPharmacyRequests",
+        "security": [{ "cookieAuth": [] }, { "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Pharmacy incoming inquiries",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AvailabilityRequestListApiResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pharmacy/requests/{id}/status": {
+      "post": {
+        "tags": ["Availability Inquiries"],
+        "summary": "Update inquiry status and pharmacist response",
+        "description": "Allows pharmacist to transition request to CONFIRMED, UNAVAILABLE, or COMPLETED with response notes.",
+        "operationId": "updateRequestStatus",
+        "security": [{ "cookieAuth": [] }, { "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Inquiry ID",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RequestStatusUpdateRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Status updated successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GenericApiResponse" }
+              }
+            }
+          },
+          "400": { "description": "Invalid status or request does not belong to your pharmacy" }
+        }
+      }
+    },
+    "/admin/overview": {
+      "get": {
+        "tags": ["Administration"],
+        "summary": "Platform operations overview & metrics",
+        "description": "Computes real-time statistics across total users, registered pharmacies, stock entries, and inquiry breakdown.",
+        "operationId": "getAdminOverview",
+        "security": [{ "cookieAuth": [] }, { "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Operational overview metrics",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminOverviewApiResponse" }
+              }
+            }
+          },
+          "403": { "description": "System administrator privileges required" }
+        }
+      }
+    },
+    "/admin/users": {
+      "get": {
+        "tags": ["Administration"],
+        "summary": "List all system users",
+        "description": "Returns list of all registered users with their roles and status (passwords redacted).",
+        "operationId": "getAdminUsers",
+        "security": [{ "cookieAuth": [] }, { "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "User list",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserListApiResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/pharmacies": {
+      "get": {
+        "tags": ["Administration"],
+        "summary": "List all pharmacies (all statuses)",
+        "description": "Returns all pharmacies including PENDING, APPROVED, and SUSPENDED.",
+        "operationId": "getAdminPharmacies",
+        "security": [{ "cookieAuth": [] }, { "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Pharmacy list",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PharmacyListApiResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/pharmacies/{id}/approve": {
+      "post": {
+        "tags": ["Administration"],
+        "summary": "Approve a pharmacy license",
+        "description": "Transitions pharmacy status from PENDING to APPROVED, making it visible to the public.",
+        "operationId": "approvePharmacy",
+        "security": [{ "cookieAuth": [] }, { "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Pharmacy ID",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pharmacy approved",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GenericApiResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/pharmacies/{id}/suspend": {
+      "post": {
+        "tags": ["Administration"],
+        "summary": "Suspend a pharmacy",
+        "description": "Transitions pharmacy status to SUSPENDED, hiding its stock from public search.",
+        "operationId": "suspendPharmacy",
+        "security": [{ "cookieAuth": [] }, { "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Pharmacy ID",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pharmacy suspended",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GenericApiResponse" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "JSESSIONID",
+        "description": "Session cookie created on /api/auth/login"
+      },
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer token header for API playground. Use user ID (1 = Admin, 2 = Pharmacy Admin, 3 = Customer)."
+      }
+    },
+    "schemas": {
+      "GenericApiResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "message": { "type": "string", "example": "Operation completed successfully" },
+          "data": { "nullable": true },
+          "error": { "type": "string", "nullable": true, "example": null },
+          "timestamp": { "type": "integer", "format": "int64", "example": 1791665240000 }
+        }
+      },
+      "ErrorApiResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": false },
+          "message": { "type": "string", "example": "Invalid credentials provided" },
+          "data": { "nullable": true, "example": null },
+          "error": { "type": "string", "example": "Invalid credentials provided" },
+          "timestamp": { "type": "integer", "format": "int64", "example": 1791665240000 }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": { "type": "string", "format": "email", "example": "careplus@medivolix.com" },
+          "password": { "type": "string", "format": "password", "example": "Pharmacy@1234" }
+        }
+      },
+      "RegisterRequest": {
+        "type": "object",
+        "required": ["fullName", "email", "password"],
+        "properties": {
+          "fullName": { "type": "string", "example": "Ananya Verma" },
+          "email": { "type": "string", "format": "email", "example": "ananya@example.com" },
+          "phone": { "type": "string", "example": "+91 98765 43210" },
+          "password": { "type": "string", "format": "password", "example": "Password@1234" }
+        }
+      },
+      "UserDto": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 2 },
+          "email": { "type": "string", "example": "careplus@medivolix.com" },
+          "fullName": { "type": "string", "example": "Ramesh Rao (CarePlus)" },
+          "phone": { "type": "string", "example": "+91 98765 11111" },
+          "role": { "type": "string", "enum": ["CUSTOMER", "PHARMACY_ADMIN", "SYSTEM_ADMIN"], "example": "PHARMACY_ADMIN" },
+          "status": { "type": "string", "enum": ["ACTIVE", "INACTIVE", "SUSPENDED"], "example": "ACTIVE" },
+          "pharmacyId": { "type": "integer", "nullable": true, "example": 1 },
+          "pharmacyName": { "type": "string", "nullable": true, "example": "CarePlus Pharmacy" }
+        }
+      },
+      "UserApiResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "message": { "type": "string", "example": "Operation successful" },
+          "data": { "$ref": "#/components/schemas/UserDto" },
+          "timestamp": { "type": "integer", "format": "int64" }
+        }
+      },
+      "UserListApiResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/UserDto" }
+          }
+        }
+      },
+      "Medicine": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "brandName": { "type": "string", "example": "Augmentin 625 Duo" },
+          "genericName": { "type": "string", "example": "Amoxicillin and Potassium Clavulanate" },
+          "strength": { "type": "string", "example": "500mg + 125mg" },
+          "dosageForm": { "type": "string", "example": "Tablet" },
+          "category": { "type": "string", "example": "Antibiotic" },
+          "manufacturer": { "type": "string", "example": "GlaxoSmithKline" },
+          "requiresPrescription": { "type": "boolean", "example": true },
+          "description": { "type": "string", "example": "Prescription antibiotic for bacterial infections." }
+        }
+      },
+      "MedicineListApiResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Medicine" }
+          }
+        }
+      },
+      "PharmacyInventory": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "pharmacyId": { "type": "integer", "example": 1 },
+          "medicineId": { "type": "integer", "example": 1 },
+          "stockQuantity": { "type": "integer", "example": 45 },
+          "price": { "type": "number", "format": "double", "example": 204.50 },
+          "isAvailable": { "type": "boolean", "example": true },
+          "lowStockThreshold": { "type": "integer", "example": 10 },
+          "lastUpdated": { "type": "string", "format": "date-time", "example": "2026-10-11T12:00:00Z" },
+          "pharmacyName": { "type": "string", "example": "CarePlus Pharmacy" },
+          "pharmacyAddress": { "type": "string", "example": "12, 100ft Road, Indiranagar, Bengaluru" },
+          "pharmacyPhone": { "type": "string", "example": "+91 80 2525 1111" },
+          "pharmacyLat": { "type": "number", "format": "double", "example": 12.971891 },
+          "pharmacyLng": { "type": "number", "format": "double", "example": 77.641151 },
+          "distanceKm": { "type": "number", "format": "double", "nullable": true, "example": 1.4 },
+          "stockStatus": { "type": "string", "enum": ["AVAILABLE", "LOW_STOCK", "UNAVAILABLE", "OUTDATED"], "example": "AVAILABLE" },
+          "isFresh": { "type": "boolean", "example": true }
+        }
+      },
+      "MedicineSearchResultDto": {
+        "type": "object",
+        "properties": {
+          "medicine": { "$ref": "#/components/schemas/Medicine" },
+          "availablePharmacies": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/PharmacyInventory" }
+          },
+          "totalReportingPharmacies": { "type": "integer", "example": 2 },
+          "anyAvailable": { "type": "boolean", "example": true }
+        }
+      },
+      "MedicineSearchApiResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/MedicineSearchResultDto" }
+          }
+        }
+      },
+      "MedicineDetailApiResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "data": { "$ref": "#/components/schemas/MedicineSearchResultDto" }
+        }
+      },
+      "Pharmacy": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "name": { "type": "string", "example": "CarePlus Pharmacy" },
+          "licenseNumber": { "type": "string", "example": "KA-BLR-2023-4412" },
+          "address": { "type": "string", "example": "12, 100ft Road, Indiranagar, Bengaluru" },
+          "city": { "type": "string", "example": "Bengaluru" },
+          "state": { "type": "string", "example": "Karnataka" },
+          "postalCode": { "type": "string", "example": "560038" },
+          "phone": { "type": "string", "example": "+91 80 2525 1111" },
+          "email": { "type": "string", "example": "careplus@medivolix.com" },
+          "latitude": { "type": "number", "format": "double", "example": 12.971891 },
+          "longitude": { "type": "number", "format": "double", "example": 77.641151 },
+          "status": { "type": "string", "enum": ["PENDING", "APPROVED", "SUSPENDED"], "example": "APPROVED" },
+          "openingHours": { "type": "string", "example": "08:00 AM - 10:30 PM (Mon-Sun)" },
+          "distanceKm": { "type": "number", "format": "double", "nullable": true, "example": 2.1 }
+        }
+      },
+      "PharmacyListApiResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Pharmacy" }
+          }
+        }
+      },
+      "PharmacyDetailApiResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "data": { "$ref": "#/components/schemas/Pharmacy" }
+        }
+      },
+      "PharmacyInventoryListApiResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/PharmacyInventory" }
+          }
+        }
+      },
+      "PharmacyInventoryItemApiResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "data": { "$ref": "#/components/schemas/PharmacyInventory" }
+        }
+      },
+      "InventoryItemRequest": {
+        "type": "object",
+        "required": ["medicineId", "stockQuantity", "price"],
+        "properties": {
+          "medicineId": { "type": "integer", "example": 1 },
+          "stockQuantity": { "type": "integer", "example": 50 },
+          "price": { "type": "number", "format": "double", "example": 195.00 },
+          "isAvailable": { "type": "boolean", "example": true },
+          "lowStockThreshold": { "type": "integer", "example": 10 },
+          "batchNumber": { "type": "string", "example": "AUG-2026-B1" },
+          "expiryDate": { "type": "string", "format": "date", "example": "2027-08-31" }
+        }
+      },
+      "BatchRequest": {
+        "type": "object",
+        "required": ["inventoryId", "batchNumber", "quantity", "expiryDate"],
+        "properties": {
+          "inventoryId": { "type": "integer", "example": 1 },
+          "batchNumber": { "type": "string", "example": "BATCH-2026-X4" },
+          "quantity": { "type": "integer", "example": 25 },
+          "expiryDate": { "type": "string", "format": "date", "example": "2027-12-31" }
+        }
+      },
+      "InventoryBatch": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "inventoryId": { "type": "integer", "example": 1 },
+          "batchNumber": { "type": "string", "example": "BATCH-2026-X4" },
+          "quantity": { "type": "integer", "example": 25 },
+          "expiryDate": { "type": "string", "format": "date", "example": "2027-12-31" },
+          "isExpired": { "type": "boolean", "example": false },
+          "medicineName": { "type": "string", "example": "Augmentin 625 Duo" }
+        }
+      },
+      "BatchApiResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "data": { "$ref": "#/components/schemas/InventoryBatch" }
+        }
+      },
+      "BatchListApiResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/InventoryBatch" }
+          }
+        }
+      },
+      "InventoryAuditLog": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "inventoryId": { "type": "integer", "example": 1 },
+          "changedBy": { "type": "integer", "example": 2 },
+          "oldQuantity": { "type": "integer", "example": 30 },
+          "newQuantity": { "type": "integer", "example": 45 },
+          "changeReason": { "type": "string", "example": "New batch recorded" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "AuditLogListApiResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/InventoryAuditLog" }
+          }
+        }
+      },
+      "CreateAvailabilityRequestDto": {
+        "type": "object",
+        "required": ["pharmacyId", "medicineId", "requestedQuantity"],
+        "properties": {
+          "pharmacyId": { "type": "integer", "example": 1 },
+          "medicineId": { "type": "integer", "example": 1 },
+          "requestedQuantity": { "type": "integer", "example": 2 },
+          "customerNotes": { "type": "string", "example": "Prescription available. Need to collect today evening." }
+        }
+      },
+      "RequestStatusUpdateRequest": {
+        "type": "object",
+        "required": ["status"],
+        "properties": {
+          "status": { "type": "string", "enum": ["CONFIRMED", "UNAVAILABLE", "COMPLETED", "CANCELLED"], "example": "CONFIRMED" },
+          "notes": { "type": "string", "example": "2 strips reserved at counter until 8 PM." }
+        }
+      },
+      "AvailabilityRequest": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "customerId": { "type": "integer", "example": 3 },
+          "pharmacyId": { "type": "integer", "example": 1 },
+          "medicineId": { "type": "integer", "example": 1 },
+          "requestedQuantity": { "type": "integer", "example": 2 },
+          "status": { "type": "string", "enum": ["PENDING", "CONFIRMED", "UNAVAILABLE", "COMPLETED", "CANCELLED"], "example": "CONFIRMED" },
+          "customerNotes": { "type": "string", "example": "Need to collect today" },
+          "responseNotes": { "type": "string", "example": "Reserved at counter" },
+          "customerName": { "type": "string", "example": "John Doe" },
+          "customerPhone": { "type": "string", "example": "+91 98765 00001" },
+          "medicineName": { "type": "string", "example": "Augmentin 625 Duo" },
+          "pharmacyName": { "type": "string", "example": "CarePlus Pharmacy" },
+          "pharmacyPhone": { "type": "string", "example": "+91 80 2525 1111" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "AvailabilityRequestApiResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "data": { "$ref": "#/components/schemas/AvailabilityRequest" }
+        }
+      },
+      "AvailabilityRequestListApiResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/AvailabilityRequest" }
+          }
+        }
+      },
+      "AdminOverviewDto": {
+        "type": "object",
+        "properties": {
+          "totalUsers": { "type": "integer", "example": 7 },
+          "totalPharmacies": { "type": "integer", "example": 4 },
+          "pendingPharmacies": { "type": "integer", "example": 1 },
+          "approvedPharmacies": { "type": "integer", "example": 3 },
+          "totalMedicines": { "type": "integer", "example": 10 },
+          "totalInventoryRecords": { "type": "integer", "example": 15 },
+          "totalAvailabilityRequests": { "type": "integer", "example": 5 },
+          "pendingRequests": { "type": "integer", "example": 2 },
+          "confirmedRequests": { "type": "integer", "example": 2 }
+        }
+      },
+      "AdminOverviewApiResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "data": { "$ref": "#/components/schemas/AdminOverviewDto" }
+        }
+      },
+      "HealthStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "example": "UP" },
+          "database": {
+            "type": "object",
+            "properties": {
+              "status": { "type": "string", "example": "UP" },
+              "poolName": { "type": "string", "example": "MedivolixHikariPool" },
+              "latencyMs": { "type": "integer", "example": 3 }
+            }
+          },
+          "system": {
+            "type": "object",
+            "properties": {
+              "javaVersion": { "type": "string", "example": "21" },
+              "osName": { "type": "string", "example": "Windows 11" },
+              "totalMemoryMb": { "type": "integer", "example": 512 },
+              "freeMemoryMb": { "type": "integer", "example": 256 }
+            }
+          },
+          "timestamp": { "type": "integer", "format": "int64", "example": 1791665240000 }
+        }
+      },
+      "HealthApiResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "message": { "type": "string", "example": "System is healthy" },
+          "data": { "$ref": "#/components/schemas/HealthStatusDto" }
+        }
+      }
+    }
+  }
+}

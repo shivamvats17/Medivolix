@@ -101,4 +101,15 @@
         <url-pattern>/api/admin/*</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>SystemServlet</servlet-name>
+        <servlet-class>com.medivolix.controller.SystemServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SystemServlet</servlet-name>
+        <url-pattern>/api/health</url-pattern>
+        <url-pattern>/api/openapi.json</url-pattern>
+        <url-pattern>/api/system/*</url-pattern>
+    </servlet-mapping>
+
 </web-app>

@@ -16,6 +16,7 @@ import PharmacyDashboard from './pages/PharmacyDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsAndConditions from './pages/TermsAndConditions';
+import ApiExplorer from './pages/ApiExplorer';
 import NotFound from './pages/NotFound';
 
 function RequireAuth({ children, role }) {
@@ -60,6 +61,8 @@ export default function App() {
             <Route path="register" element={<Register />} />
             <Route path="privacy-policy" element={<PrivacyPolicy />} />
             <Route path="terms-and-conditions" element={<TermsAndConditions />} />
+            <Route path="api-docs" element={<ApiExplorer />} />
+            <Route path="developer/api-explorer" element={<ApiExplorer />} />
 
             {/* Authenticated Customer Pages */}
             <Route

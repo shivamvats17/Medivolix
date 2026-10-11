@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Search, Building2, LogOut, ShieldCheck, ClipboardList, Menu, X } from 'lucide-react';
+import { Search, Building2, LogOut, ShieldCheck, ClipboardList, Menu, X, Code } from 'lucide-react';
 
 export default function Navbar() {
   const { user, isAuthenticated, isCustomer, isPharmacyAdmin, isSystemAdmin, logout } = useAuth();
@@ -82,6 +82,17 @@ export default function Navbar() {
             fontSize: '0.9375rem',
           }}>
             <Search size={17} /> Search Medicines
+          </Link>
+
+          <Link to="/api-docs" style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            color: 'var(--text-secondary)',
+            fontWeight: 500,
+            fontSize: '0.9375rem',
+          }}>
+            <Code size={16} /> API Docs
           </Link>
 
           {/* Role specific links */}
@@ -189,6 +200,13 @@ export default function Navbar() {
             style={{ padding: '8px 0', fontWeight: 500 }}
           >
             Search Medicines
+          </Link>
+          <Link
+            to="/api-docs"
+            onClick={() => setMobileMenuOpen(false)}
+            style={{ padding: '8px 0', fontWeight: 500, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            <Code size={16} /> API Docs (OpenAPI)
           </Link>
           {isAuthenticated && isCustomer && (
             <Link

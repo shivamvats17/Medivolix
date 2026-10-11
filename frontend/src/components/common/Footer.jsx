@@ -61,6 +61,9 @@ export default function Footer() {
               <li>
                 <Link to="/register" style={{ color: '#cbd5e1' }}>Register Customer Account</Link>
               </li>
+              <li>
+                <Link to="/api-docs" style={{ color: '#cbd5e1' }}>REST API Docs (OpenAPI 3.0)</Link>
+              </li>
             </ul>
           </div>
 

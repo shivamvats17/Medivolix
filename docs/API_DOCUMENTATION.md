@@ -2,6 +2,11 @@
 
 Base URL: `http://localhost:8080/api` (or proxied via Vite at `http://localhost:5173/api`)
 
+### Interactive OpenAPI 3.0 Documentation & Explorer
+- **In-App Interactive API Explorer**: Navigate to `http://localhost:5173/api-docs` (includes real-time HTTP testing workbench, auth preset switcher, cURL generator, and parameter controls).
+- **OpenAPI 3.0 Specification (JSON)**: `http://localhost:8080/api/openapi.json` or `frontend/public/openapi.json`.
+- **OpenAPI 3.0 Specification (YAML)**: [`docs/openapi.yaml`](openapi.yaml).
+
 All responses adhere to the standard JSON wrapper structure:
 ```json
 {
@@ -207,3 +212,39 @@ All responses adhere to the standard JSON wrapper structure:
 ### Suspend Pharmacy
 - **Endpoint**: `POST /api/admin/pharmacies/{id}/suspend`
 - **Access**: Authenticated (`SYSTEM_ADMIN`)
+
+---
+
+## 7. System Diagnostics & Health Endpoints
+
+### Platform Health Check
+- **Endpoint**: `GET /api/health`
+- **Access**: Public
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "message": "System is fully operational",
+  "data": {
+    "status": "UP",
+    "timestamp": 1791665240000,
+    "database": {
+      "status": "UP",
+      "poolName": "MedivolixHikariPool",
+      "latencyMs": 2,
+      "databaseProduct": "MySQL"
+    },
+    "system": {
+      "javaVersion": "21.0.3",
+      "osName": "Windows 11",
+      "totalMemoryMb": 512,
+      "freeMemoryMb": 256
+    }
+  }
+}
+```
+
+### OpenAPI Specification Document
+- **Endpoint**: `GET /api/openapi.json`
+- **Access**: Public
+- **Response (200 OK)**: Returns complete OpenAPI 3.0.3 specification JSON.
