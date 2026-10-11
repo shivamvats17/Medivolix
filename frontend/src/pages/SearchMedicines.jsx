@@ -5,6 +5,8 @@ import { Search, MapPin, AlertCircle, Building2, X, Filter, Navigation, ArrowRig
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import StatusBadge from '../components/common/StatusBadge';
 import FreshnessBadge from '../components/common/FreshnessBadge';
+import Pagination from '../components/common/Pagination';
+import { paginateItems } from '../utils/paginationUtils';
 
 export default function SearchMedicines() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -14,6 +16,10 @@ export default function SearchMedicines() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Pagination states
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   // User Geolocation
   const [userLocation, setUserLocation] = useState(null);
@@ -34,6 +40,7 @@ export default function SearchMedicines() {
         const data = await medicineService.searchMedicines(initialQuery, lat, lng);
         if (!ignore) {
           setResults(data || []);
+          setPage(1);
         }
       } catch (err) {
         if (!ignore) {
@@ -55,11 +62,13 @@ export default function SearchMedicines() {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setSearchParams(query.trim() ? { q: query.trim() } : {});
+    setPage(1);
   };
 
   const handleClear = () => {
     setQuery('');
     setSearchParams({});
+    setPage(1);
   };
 
   const requestLocation = () => {
@@ -97,6 +106,8 @@ export default function SearchMedicines() {
     }
     return true;
   });
+
+  const paginatedResults = paginateItems(filteredResults, page, pageSize);
 
   return (
     <div className="container" style={{ padding: '32px 16px' }}>
@@ -195,7 +206,10 @@ export default function SearchMedicines() {
             <button
               key={tab.id}
               type="button"
-              onClick={() => setFilterType(tab.id)}
+              onClick={() => {
+                setFilterType(tab.id);
+                setPage(1);
+              }}
               className={`btn btn-sm ${filterType === tab.id ? 'btn-primary' : 'btn-secondary'}`}
               style={{ fontSize: '0.8125rem' }}
             >
@@ -247,11 +261,17 @@ export default function SearchMedicines() {
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '20px' }}>
-          <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-            Showing {filteredResults.length} medicine{filteredResults.length > 1 ? 's' : ''} with participating pharmacy availability:
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+            <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+              Showing {filteredResults.length} medicine{filteredResults.length > 1 ? 's' : ''} with participating pharmacy availability:
+            </div>
+            <span className="badge badge-info" style={{ fontWeight: 600 }}>
+              {filteredResults.length} total rows
+            </span>
           </div>
 
-          {filteredResults.map((result) => {
+          {paginatedResults.map((result, index) => {
+            const rowNum = (pageSize === 'All' ? 0 : (page - 1) * pageSize) + index + 1;
             const med = result.medicine;
             const reportingPharmacies = result.availablePharmacies || [];
 
@@ -261,6 +281,9 @@ export default function SearchMedicines() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '14px' }}>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <span className="badge badge-stale" style={{ fontSize: '0.75rem', fontWeight: 700 }}>
+                        #{rowNum}
+                      </span>
                       <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>
                         {med.name}
                       </h2>
@@ -371,6 +394,19 @@ export default function SearchMedicines() {
               </div>
             );
           })}
+
+          <Pagination
+            currentPage={page}
+            totalItems={filteredResults.length}
+            pageSize={pageSize}
+            onPageChange={setPage}
+            onPageSizeChange={(sz) => {
+              setPageSize(sz);
+              setPage(1);
+            }}
+            itemLabel="medicines"
+            id="search-pagination"
+          />
         </div>
       )}
     </div>

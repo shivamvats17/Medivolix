@@ -197,11 +197,13 @@ All seed passwords are encrypted using BCrypt (`$2a$10$...`) in MySQL. For conve
 
 | Role | Email | Password | Access & Responsibilities |
 | :--- | :--- | :--- | :--- |
-| **SYSTEM_ADMIN** | `admin@medivolix.com` | `Admin@1234` | Approves or suspends pharmacies; views live DB statistics |
-| **PHARMACY_ADMIN** | `careplus@medivolix.com` | `Pharmacy@1234` | Manages CarePlus Pharmacy stock, batches, and patient inquiries |
-| **PHARMACY_ADMIN** | `apollo@medivolix.com` | `Pharmacy@1234` | Manages Apollo Pharmacy inventory and inquiries |
-| **CUSTOMER** | `john.doe@example.com` | `Customer@1234` | Searches medicines, views distance, submits availability inquiries |
-| **CUSTOMER** | `priya.sharma@example.com` | `Customer@1234` | Test customer |
+| **SYSTEM_ADMIN** | `admin@medivolix.com` | `Admin@1234` | Dr. Rajesh Sharma - Approves/suspends pharmacies; views live DB statistics |
+| **PHARMACY_ADMIN** | `careplus@medivolix.com` | `Pharmacy@1234` | Manoj Gehlot - Apollo Pharmacy (MI Road, Jaipur) |
+| **PHARMACY_ADMIN** | `apollo@medivolix.com` | `Pharmacy@1234` | Suresh Bishnoi - Marwar Chemist (Shastri Nagar, Jodhpur) |
+| **PHARMACY_ADMIN** | `medplus@medivolix.com` | `Pharmacy@1234` | Amitabh Mathur - Apollo Pharmacy (Connaught Place, New Delhi) |
+| **CUSTOMER** | `john.doe@example.com` | `Customer@1234` | Rahul Sharma (Jaipur) - Searches medicines, submits inquiries |
+| **CUSTOMER** | `priya.sharma@example.com` | `Customer@1234` | Priya Sharma (Jodhpur) - Test customer |
+| **CUSTOMER** | `amit.patel@example.com` | `Customer@1234` | Amit Patel (Delhi) - Test customer |
 
 ---
 
@@ -250,10 +252,12 @@ Medivolix includes a built-in interactive developer workbench and formal OpenAPI
 - [x] Cross-pharmacy access restrictions strictly enforced on the server.
 - [x] Production WAR file builds successfully (`target/medivolix.war`).
 - [x] Production React bundle builds successfully (`frontend/dist`).
-- [x] Automated Vitest frontend unit & component test suite (15/15 tests passing).
+- [x] Automated Vitest frontend unit & component test suite (22/22 tests passing).
+- [x] Automated JUnit 5 backend unit test suite (22/22 tests passing).
+- [x] Responsive pagination, row counters, and numbered badges across all data tables and inquiry views.
 - [x] OpenAPI 3.0 specification and interactive REST API Explorer (`/api-docs`) implemented.
 - [x] RFC 4180 CSV data export and printable clinical PDF confirmation slips functional.
-- [x] Original SVG favicon loads and meta descriptions configured.
+- [x] Original SVG & brand logo assets and meta descriptions configured.
 - [x] Privacy Policy (`/privacy-policy`) and Terms and Conditions (`/terms-and-conditions`) available.
 - [x] Transparent freshness disclaimers implemented; no fake metrics or reviews.
 - [ ] NOT READY FOR PUBLIC LAUNCH: Custom domain DNS, production HTTPS, and state drug regulatory review pending owner deployment.

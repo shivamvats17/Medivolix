@@ -42,13 +42,18 @@ mysql -u root -p -e "source seed.sql"
 
 ## Development Seed Accounts
 
-| Role | Email | Password | Details |
+| Role | Email | Password | Details & Location |
 | :--- | :--- | :--- | :--- |
-| **SYSTEM_ADMIN** | `admin@medivolix.com` | `Admin@1234` | Full access to approve/suspend pharmacies & view all users |
-| **PHARMACY_ADMIN** | `careplus@medivolix.com` | `Pharmacy@1234` | Manages CarePlus Pharmacy (Indiranagar) |
-| **PHARMACY_ADMIN** | `apollo@medivolix.com` | `Pharmacy@1234` | Manages Apollo Pharmacy (Koramangala) |
-| **CUSTOMER** | `john.doe@example.com` | `Customer@1234` | Test customer with active availability requests |
-| **CUSTOMER** | `priya.sharma@example.com` | `Customer@1234` | Test customer |
+| **SYSTEM_ADMIN** | `admin@medivolix.com` | `Admin@1234` | Dr. Rajesh Sharma - Full access to govern pharmacies & users |
+| **PHARMACY_ADMIN** | `careplus@medivolix.com` | `Pharmacy@1234` | Manoj Gehlot - Apollo Pharmacy (MI Road, Jaipur) |
+| **PHARMACY_ADMIN** | `apollo@medivolix.com` | `Pharmacy@1234` | Suresh Bishnoi - Marwar Chemist (Shastri Nagar, Jodhpur) |
+| **PHARMACY_ADMIN** | `medplus@medivolix.com` | `Pharmacy@1234` | Amitabh Mathur - Apollo Pharmacy (Connaught Place, New Delhi) |
+| **PHARMACY_ADMIN** | `guardian@medivolix.com` | `Pharmacy@1234` | Pooja Aggarwal - Guardian Pharmacy (Lajpat Nagar, New Delhi) |
+| **PHARMACY_ADMIN** | `fortis@medivolix.com` | `Pharmacy@1234` | Vikas Chauhan - Fortis Pharmacy (Sector 62, Noida) |
+| **PHARMACY_ADMIN** | `cybercity@medivolix.com` | `Pharmacy@1234` | Deepak Verma - MedPlus (DLF Cyber City, Gurugram) |
+| **CUSTOMER** | `john.doe@example.com` | `Customer@1234` | Rahul Sharma (Jaipur) - Active patient inquiries |
+| **CUSTOMER** | `priya.sharma@example.com` | `Customer@1234` | Priya Sharma (Jodhpur) - Active patient inquiries |
+| **CUSTOMER** | `amit.patel@example.com` | `Customer@1234` | Amit Patel (Delhi) - Active patient inquiries |
 
 > **Note on Security:** All passwords in `seed.sql` are stored as industry-standard **BCrypt** hashes (`$2a$10$...`). Never use these default credentials in production!
 

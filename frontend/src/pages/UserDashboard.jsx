@@ -5,11 +5,15 @@ import { requestService } from '../services/requestService';
 import { ClipboardList, Building2, Phone, Search, AlertCircle, RefreshCw, XCircle, CheckCircle2, Printer } from 'lucide-react';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import StatusBadge from '../components/common/StatusBadge';
+import Pagination from '../components/common/Pagination';
+import { paginateItems } from '../utils/paginationUtils';
 import { printInquirySlip } from '../utils/exportUtils';
 
 export default function UserDashboard() {
   const { user } = useAuth();
   const [requests, setRequests] = useState([]);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [actionMessage, setActionMessage] = useState(null);
@@ -93,11 +97,14 @@ export default function UserDashboard() {
       )}
 
       {/* Inquiries Section */}
-      <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
         <h2 style={{ fontSize: '1.25rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
           <ClipboardList size={20} style={{ color: 'var(--primary)' }} />
           My Availability Inquiries ({requests.length})
         </h2>
+        <span className="badge badge-info" style={{ fontWeight: 600 }}>
+          {requests.length} total inquiries
+        </span>
       </div>
 
       {loading ? (
@@ -133,13 +140,15 @@ export default function UserDashboard() {
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {requests.map((req) => (
+          {paginateItems(requests, page, pageSize).map((req, index) => {
+            const rowNum = (pageSize === 'All' ? 0 : (page - 1) * pageSize) + index + 1;
+            return (
             <div key={req.id} className="card" style={{ padding: '20px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                     <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>
-                      INQUIRY #{req.id}
+                      #{rowNum} &bull; INQUIRY #{req.id}
                     </span>
                     <StatusBadge status={req.status} />
                   </div>
@@ -243,7 +252,20 @@ export default function UserDashboard() {
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
+          <Pagination
+            currentPage={page}
+            totalItems={requests.length}
+            pageSize={pageSize}
+            onPageChange={setPage}
+            onPageSizeChange={(sz) => {
+              setPageSize(sz);
+              setPage(1);
+            }}
+            itemLabel="inquiries"
+            id="user-requests-pagination"
+          />
         </div>
       )}
     </div>

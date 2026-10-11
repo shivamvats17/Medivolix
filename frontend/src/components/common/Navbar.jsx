@@ -31,23 +31,21 @@ export default function Navbar() {
         <Link to="/" style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '10px',
+          gap: '12px',
           textDecoration: 'none',
         }}>
-          <div style={{
-            width: '36px',
-            height: '36px',
-            backgroundColor: 'var(--primary)',
-            borderRadius: '6px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#ffffff',
-            fontWeight: 800,
-            fontSize: '1.25rem',
-          }}>
-            M
-          </div>
+          <img
+            src="/medivolix-logo.jpg"
+            alt="Medivolix Brand Logo"
+            style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '8px',
+              objectFit: 'cover',
+              border: '1px solid var(--border-subtle)',
+              boxShadow: 'var(--shadow-sm)',
+            }}
+          />
           <div>
             <span style={{
               fontSize: '1.375rem',

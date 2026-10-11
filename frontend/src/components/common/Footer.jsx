@@ -22,27 +22,25 @@ export default function Footer() {
         }}>
           {/* Column 1: Brand & Purpose */}
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-              <div style={{
-                width: '28px',
-                height: '28px',
-                backgroundColor: 'var(--primary)',
-                borderRadius: '4px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#ffffff',
-                fontWeight: 700,
-                fontSize: '0.9375rem',
-              }}>
-                M
-              </div>
-              <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#ffffff' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+              <img
+                src="/medivolix-logo.jpg"
+                alt="Medivolix Logo"
+                style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '8px',
+                  objectFit: 'contain',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                }}
+              />
+              <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.02em' }}>
                 Medivolix
               </span>
             </div>
             <p style={{ fontSize: '0.875rem', color: '#94a3b8', lineHeight: 1.6 }}>
-              Community medicine availability platform. Enabling patients to locate stock across licensed pharmacies and confirm before travelling.
+              Community medicine availability platform across Jaipur, Jodhpur, Delhi NCR, and nearby regions. Enabling patients to locate stock across licensed pharmacies and confirm before travelling.
             </p>
           </div>
 

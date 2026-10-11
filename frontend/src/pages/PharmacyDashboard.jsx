@@ -10,6 +10,8 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 import StatusBadge from '../components/common/StatusBadge';
 import FreshnessBadge from '../components/common/FreshnessBadge';
 import Modal from '../components/common/Modal';
+import Pagination from '../components/common/Pagination';
+import { paginateItems } from '../utils/paginationUtils';
 import {
   exportInventoryCsv,
   exportExpiringBatchesCsv,
@@ -29,6 +31,22 @@ export default function PharmacyDashboard() {
   const [requests, setRequests] = useState([]);
   const [auditLogs, setAuditLogs] = useState([]);
   const [allMedicines, setAllMedicines] = useState([]);
+
+  // Pagination states
+  const [inventoryPage, setInventoryPage] = useState(1);
+  const [inventoryPageSize, setInventoryPageSize] = useState(10);
+
+  const [lowStockPage, setLowStockPage] = useState(1);
+  const [lowStockPageSize, setLowStockPageSize] = useState(10);
+
+  const [expiryPage, setExpiryPage] = useState(1);
+  const [expiryPageSize, setExpiryPageSize] = useState(10);
+
+  const [requestsPage, setRequestsPage] = useState(1);
+  const [requestsPageSize, setRequestsPageSize] = useState(10);
+
+  const [auditPage, setAuditPage] = useState(1);
+  const [auditPageSize, setAuditPageSize] = useState(10);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -173,6 +191,13 @@ export default function PharmacyDashboard() {
     );
   });
 
+  // Paginated data slices
+  const paginatedInventory = paginateItems(filteredInventory, inventoryPage, inventoryPageSize);
+  const paginatedLowStock = paginateItems(lowStock, lowStockPage, lowStockPageSize);
+  const paginatedExpiring = paginateItems(expiringBatches, expiryPage, expiryPageSize);
+  const paginatedRequests = paginateItems(requests, requestsPage, requestsPageSize);
+  const paginatedAudit = paginateItems(auditLogs, auditPage, auditPageSize);
+
   if (loading && inventory.length === 0) {
     return <LoadingSpinner message="Loading pharmacy dashboard..." />;
   }
@@ -306,11 +331,17 @@ export default function PharmacyDashboard() {
                 className="form-control"
                 placeholder="Search store inventory..."
                 value={inventorySearch}
-                onChange={(e) => setInventorySearch(e.target.value)}
+                onChange={(e) => {
+                  setInventorySearch(e.target.value);
+                  setInventoryPage(1);
+                }}
                 style={{ paddingLeft: '36px' }}
               />
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <span className="badge badge-info" style={{ fontWeight: 600 }}>
+                {filteredInventory.length} total rows
+              </span>
               <button
                 type="button"
                 onClick={() => exportInventoryCsv(filteredInventory, user?.pharmacyName)}
@@ -320,9 +351,6 @@ export default function PharmacyDashboard() {
               >
                 <FileSpreadsheet size={15} /> Export CSV
               </button>
-              <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
-                Showing {filteredInventory.length} medicines
-              </div>
             </div>
           </div>
 
@@ -334,80 +362,99 @@ export default function PharmacyDashboard() {
               </button>
             </div>
           ) : (
-            <div className="table-responsive card" style={{ padding: 0 }}>
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Medicine Name</th>
-                    <th>Composition / Dosage</th>
-                    <th>Stock Quantity</th>
-                    <th>Unit Price</th>
-                    <th>Status</th>
-                    <th>Last Stock Update</th>
-                    <th style={{ textAlign: 'right' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredInventory.map((item) => (
-                    <tr key={item.id}>
-                      <td>
-                        <strong style={{ color: 'var(--text-main)' }}>{item.medicineName}</strong>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                          Brand: {item.brandName}
-                        </div>
-                      </td>
-                      <td>
-                        {item.genericName}
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                          {item.strength} ({item.dosageForm})
-                        </div>
-                      </td>
-                      <td>
-                        <strong>{item.stockQuantity}</strong> units
-                        {item.stockQuantity <= item.lowStockThreshold && (
-                          <div style={{ fontSize: '0.6875rem', color: '#ea580c', fontWeight: 600 }}>Low Stock Alert</div>
-                        )}
-                      </td>
-                      <td>
-                        {item.price ? `₹${parseFloat(item.price).toFixed(2)}` : '—'}
-                      </td>
-                      <td>
-                        <StatusBadge status={item.stockQuantity > 0 && item.isAvailable ? (item.stockQuantity <= item.lowStockThreshold ? 'LOW_STOCK' : 'AVAILABLE') : 'UNAVAILABLE'} />
-                      </td>
-                      <td>
-                        <FreshnessBadge lastUpdate={item.lastStockUpdate} isFresh={true} />
-                      </td>
-                      <td style={{ textAlign: 'right' }}>
-                        <div style={{ display: 'inline-flex', gap: '6px' }}>
-                          <button
-                            onClick={() => {
-                              setSelectedMedId(String(item.medicineId));
-                              setStockQty(String(item.stockQuantity));
-                              setUnitPrice(String(item.price));
-                              setLowStockThresh(String(item.lowStockThreshold));
-                              setAddModalOpen(true);
-                            }}
-                            className="btn btn-secondary btn-sm"
-                            title="Edit stock or price"
-                          >
-                            <Edit size={13} /> Edit
-                          </button>
-                          {item.isAvailable && item.stockQuantity > 0 && (
-                            <button
-                              onClick={() => handleMarkUnavailable(item.id)}
-                              className="btn btn-secondary btn-sm"
-                              style={{ color: '#dc2626' }}
-                              title="Mark temporarily unavailable"
-                            >
-                              Unavailable
-                            </button>
-                          )}
-                        </div>
-                      </td>
+            <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+              <div className="table-responsive">
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th className="th-row-num">#</th>
+                      <th>Medicine Name</th>
+                      <th>Composition / Dosage</th>
+                      <th>Stock Quantity</th>
+                      <th>Unit Price</th>
+                      <th>Status</th>
+                      <th>Last Stock Update</th>
+                      <th style={{ textAlign: 'right' }}>Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {paginatedInventory.map((item, index) => {
+                      const rowNum = (inventoryPageSize === 'All' ? 0 : (inventoryPage - 1) * inventoryPageSize) + index + 1;
+                      return (
+                        <tr key={item.id}>
+                          <td className="td-row-num">{rowNum}</td>
+                          <td>
+                            <strong style={{ color: 'var(--text-main)' }}>{item.medicineName}</strong>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                              Brand: {item.brandName}
+                            </div>
+                          </td>
+                          <td>
+                            {item.genericName}
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                              {item.strength} ({item.dosageForm})
+                            </div>
+                          </td>
+                          <td>
+                            <strong>{item.stockQuantity}</strong> units
+                            {item.stockQuantity <= item.lowStockThreshold && (
+                              <div style={{ fontSize: '0.6875rem', color: '#ea580c', fontWeight: 600 }}>Low Stock Alert</div>
+                            )}
+                          </td>
+                          <td>
+                            {item.price ? `₹${parseFloat(item.price).toFixed(2)}` : '—'}
+                          </td>
+                          <td>
+                            <StatusBadge status={item.stockQuantity > 0 && item.isAvailable ? (item.stockQuantity <= item.lowStockThreshold ? 'LOW_STOCK' : 'AVAILABLE') : 'UNAVAILABLE'} />
+                          </td>
+                          <td>
+                            <FreshnessBadge lastUpdate={item.lastStockUpdate} isFresh={true} />
+                          </td>
+                          <td style={{ textAlign: 'right' }}>
+                            <div style={{ display: 'inline-flex', gap: '6px' }}>
+                              <button
+                                onClick={() => {
+                                  setSelectedMedId(String(item.medicineId));
+                                  setStockQty(String(item.stockQuantity));
+                                  setUnitPrice(String(item.price));
+                                  setLowStockThresh(String(item.lowStockThreshold));
+                                  setAddModalOpen(true);
+                                }}
+                                className="btn btn-secondary btn-sm"
+                                title="Edit stock or price"
+                              >
+                                <Edit size={13} /> Edit
+                              </button>
+                              {item.isAvailable && item.stockQuantity > 0 && (
+                                <button
+                                  onClick={() => handleMarkUnavailable(item.id)}
+                                  className="btn btn-secondary btn-sm"
+                                  style={{ color: '#dc2626' }}
+                                  title="Mark temporarily unavailable"
+                                >
+                                  Unavailable
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <Pagination
+                currentPage={inventoryPage}
+                totalItems={filteredInventory.length}
+                pageSize={inventoryPageSize}
+                onPageChange={setInventoryPage}
+                onPageSizeChange={(sz) => {
+                  setInventoryPageSize(sz);
+                  setInventoryPage(1);
+                }}
+                itemLabel="medicines"
+                id="inventory-pagination"
+              />
             </div>
           )}
         </div>
@@ -420,15 +467,20 @@ export default function PharmacyDashboard() {
             <div style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
               Medicines where reported stock is at or below the designated reorder threshold.
             </div>
-            {lowStock.length > 0 && (
-              <button
-                type="button"
-                onClick={() => exportInventoryCsv(lowStock, `${user?.pharmacyName || 'pharmacy'}_low_stock`)}
-                className="btn btn-secondary btn-sm"
-              >
-                <FileSpreadsheet size={15} /> Export Low-Stock CSV
-              </button>
-            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <span className="badge badge-low" style={{ fontWeight: 600 }}>
+                {lowStock.length} total rows
+              </span>
+              {lowStock.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => exportInventoryCsv(lowStock, `${user?.pharmacyName || 'pharmacy'}_low_stock`)}
+                  className="btn btn-secondary btn-sm"
+                >
+                  <FileSpreadsheet size={15} /> Export Low-Stock CSV
+                </button>
+              )}
+            </div>
           </div>
           {lowStock.length === 0 ? (
             <div className="card" style={{ textAlign: 'center', padding: '36px' }}>
@@ -437,47 +489,66 @@ export default function PharmacyDashboard() {
               <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>No items are currently below their low-stock threshold.</p>
             </div>
           ) : (
-            <div className="table-responsive card" style={{ padding: 0 }}>
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Medicine</th>
-                    <th>Current Units</th>
-                    <th>Threshold</th>
-                    <th>Unit Price</th>
-                    <th style={{ textAlign: 'right' }}>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {lowStock.map((item) => (
-                    <tr key={item.id}>
-                      <td>
-                        <strong>{item.medicineName}</strong>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{item.strength}</div>
-                      </td>
-                      <td style={{ color: '#ea580c', fontWeight: 700 }}>
-                        {item.stockQuantity} units
-                      </td>
-                      <td>{item.lowStockThreshold} units</td>
-                      <td>₹{parseFloat(item.price).toFixed(2)}</td>
-                      <td style={{ textAlign: 'right' }}>
-                        <button
-                          onClick={() => {
-                            setSelectedMedId(String(item.medicineId));
-                            setStockQty(String(item.stockQuantity));
-                            setUnitPrice(String(item.price));
-                            setLowStockThresh(String(item.lowStockThreshold));
-                            setAddModalOpen(true);
-                          }}
-                          className="btn btn-primary btn-sm"
-                        >
-                          Restock Quantity
-                        </button>
-                      </td>
+            <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+              <div className="table-responsive">
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th className="th-row-num">#</th>
+                      <th>Medicine</th>
+                      <th>Current Units</th>
+                      <th>Threshold</th>
+                      <th>Unit Price</th>
+                      <th style={{ textAlign: 'right' }}>Action</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {paginatedLowStock.map((item, index) => {
+                      const rowNum = (lowStockPageSize === 'All' ? 0 : (lowStockPage - 1) * lowStockPageSize) + index + 1;
+                      return (
+                        <tr key={item.id}>
+                          <td className="td-row-num">{rowNum}</td>
+                          <td>
+                            <strong>{item.medicineName}</strong>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{item.strength}</div>
+                          </td>
+                          <td style={{ color: '#ea580c', fontWeight: 700 }}>
+                            {item.stockQuantity} units
+                          </td>
+                          <td>{item.lowStockThreshold} units</td>
+                          <td>₹{parseFloat(item.price).toFixed(2)}</td>
+                          <td style={{ textAlign: 'right' }}>
+                            <button
+                              onClick={() => {
+                                setSelectedMedId(String(item.medicineId));
+                                setStockQty(String(item.stockQuantity));
+                                setUnitPrice(String(item.price));
+                                setLowStockThresh(String(item.lowStockThreshold));
+                                setAddModalOpen(true);
+                              }}
+                              className="btn btn-primary btn-sm"
+                            >
+                              Restock Quantity
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <Pagination
+                currentPage={lowStockPage}
+                totalItems={lowStock.length}
+                pageSize={lowStockPageSize}
+                onPageChange={setLowStockPage}
+                onPageSizeChange={(sz) => {
+                  setLowStockPageSize(sz);
+                  setLowStockPage(1);
+                }}
+                itemLabel="low-stock items"
+                id="lowstock-pagination"
+              />
             </div>
           )}
         </div>
@@ -490,26 +561,31 @@ export default function PharmacyDashboard() {
             <div style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
               Batch-level monitoring flags stock batches expiring within 45 days. Expired stock is automatically quarantined from publicly reported availability.
             </div>
-            {expiringBatches.length > 0 && (
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button
-                  type="button"
-                  onClick={() => exportExpiringBatchesCsv(expiringBatches, user?.pharmacyName)}
-                  className="btn btn-secondary btn-sm"
-                  title="Download expiring batches as CSV spreadsheet"
-                >
-                  <FileSpreadsheet size={15} /> Export Batches CSV
-                </button>
-                <button
-                  type="button"
-                  onClick={() => printBatchExpiryReport({ name: user?.pharmacyName }, expiringBatches)}
-                  className="btn btn-primary btn-sm"
-                  title="Generate official printable Batch Expiry Audit Report"
-                >
-                  <Printer size={15} /> Print Audit Report (PDF)
-                </button>
-              </div>
-            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <span className="badge badge-low" style={{ fontWeight: 600 }}>
+                {expiringBatches.length} total rows
+              </span>
+              {expiringBatches.length > 0 && (
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    type="button"
+                    onClick={() => exportExpiringBatchesCsv(expiringBatches, user?.pharmacyName)}
+                    className="btn btn-secondary btn-sm"
+                    title="Download expiring batches as CSV spreadsheet"
+                  >
+                    <FileSpreadsheet size={15} /> Export Batches CSV
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => printBatchExpiryReport({ name: user?.pharmacyName }, expiringBatches)}
+                    className="btn btn-primary btn-sm"
+                    title="Generate official printable Batch Expiry Audit Report"
+                  >
+                    <Printer size={15} /> Print Audit Report (PDF)
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
           {expiringBatches.length === 0 ? (
             <div className="card" style={{ textAlign: 'center', padding: '36px' }}>
@@ -518,40 +594,59 @@ export default function PharmacyDashboard() {
               <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>All tracked batches have more than 45 days of validity remaining.</p>
             </div>
           ) : (
-            <div className="table-responsive card" style={{ padding: 0 }}>
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Medicine</th>
-                    <th>Batch Number</th>
-                    <th>Batch Quantity</th>
-                    <th>Expiry Date</th>
-                    <th>Days Remaining</th>
-                    <th>Batch Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {expiringBatches.map((b) => (
-                    <tr key={b.id}>
-                      <td><strong>{b.medicineName}</strong></td>
-                      <td><code>{b.batchNumber}</code></td>
-                      <td>{b.quantity} units</td>
-                      <td>{b.expiryDate}</td>
-                      <td>
-                        <span style={{
-                          color: b.daysUntilExpiry <= 30 ? '#dc2626' : '#ea580c',
-                          fontWeight: 700,
-                        }}>
-                          {b.daysUntilExpiry} days
-                        </span>
-                      </td>
-                      <td>
-                        <span className="badge badge-low">{b.status}</span>
-                      </td>
+            <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+              <div className="table-responsive">
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th className="th-row-num">#</th>
+                      <th>Medicine</th>
+                      <th>Batch Number</th>
+                      <th>Batch Quantity</th>
+                      <th>Expiry Date</th>
+                      <th>Days Remaining</th>
+                      <th>Batch Status</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {paginatedExpiring.map((b, index) => {
+                      const rowNum = (expiryPageSize === 'All' ? 0 : (expiryPage - 1) * expiryPageSize) + index + 1;
+                      return (
+                        <tr key={b.id}>
+                          <td className="td-row-num">{rowNum}</td>
+                          <td><strong>{b.medicineName}</strong></td>
+                          <td><code>{b.batchNumber}</code></td>
+                          <td>{b.quantity} units</td>
+                          <td>{b.expiryDate}</td>
+                          <td>
+                            <span style={{
+                              color: b.daysUntilExpiry <= 30 ? '#dc2626' : '#ea580c',
+                              fontWeight: 700,
+                            }}>
+                              {b.daysUntilExpiry} days
+                            </span>
+                          </td>
+                          <td>
+                            <span className="badge badge-low">{b.status}</span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <Pagination
+                currentPage={expiryPage}
+                totalItems={expiringBatches.length}
+                pageSize={expiryPageSize}
+                onPageChange={setExpiryPage}
+                onPageSizeChange={(sz) => {
+                  setExpiryPageSize(sz);
+                  setExpiryPage(1);
+                }}
+                itemLabel="batches"
+                id="expiry-pagination"
+              />
             </div>
           )}
         </div>
@@ -560,8 +655,13 @@ export default function PharmacyDashboard() {
       {/* Tab 4: Customer Inquiries */}
       {activeTab === 'REQUESTS' && (
         <div>
-          <div style={{ marginBottom: '16px', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-            In-app medicine availability inquiries submitted by patients. Confirm stock or leave notes to assist patients before they arrive.
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
+            <div style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+              In-app medicine availability inquiries submitted by patients. Confirm stock or leave notes to assist patients before they arrive.
+            </div>
+            <span className="badge badge-info" style={{ fontWeight: 600 }}>
+              {requests.length} total inquiries
+            </span>
           </div>
           {requests.length === 0 ? (
             <div className="card" style={{ textAlign: 'center', padding: '36px' }}>
@@ -569,76 +669,91 @@ export default function PharmacyDashboard() {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              {requests.map((r) => (
-                <div key={r.id} className="card" style={{ padding: '20px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>
-                          INQUIRY #{r.id}
-                        </span>
-                        <StatusBadge status={r.status} />
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                          {r.createdAt ? new Date(r.createdAt).toLocaleString() : ''}
-                        </span>
+              {paginatedRequests.map((r, index) => {
+                const rowNum = (requestsPageSize === 'All' ? 0 : (requestsPage - 1) * requestsPageSize) + index + 1;
+                return (
+                  <div key={r.id} className="card" style={{ padding: '20px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>
+                            #{rowNum} &bull; INQUIRY #{r.id}
+                          </span>
+                          <StatusBadge status={r.status} />
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                            {r.createdAt ? new Date(r.createdAt).toLocaleString() : ''}
+                          </span>
+                        </div>
+                        <h3 style={{ fontSize: '1.125rem', fontWeight: 700, marginTop: '4px' }}>
+                          {r.medicineName} &bull; Requested: {r.requestedQuantity} unit(s)
+                        </h3>
+                        <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                          Patient: <strong>{r.customerName}</strong> &bull; Phone: <a href={`tel:${r.customerPhone}`}>{r.customerPhone}</a>
+                        </div>
                       </div>
-                      <h3 style={{ fontSize: '1.125rem', fontWeight: 700, marginTop: '4px' }}>
-                        {r.medicineName} &bull; Requested: {r.requestedQuantity} unit(s)
-                      </h3>
-                      <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                        Patient: <strong>{r.customerName}</strong> &bull; Phone: <a href={`tel:${r.customerPhone}`}>{r.customerPhone}</a>
+
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <button
+                          type="button"
+                          onClick={() => printInquirySlip(r, { name: user?.pharmacyName })}
+                          className="btn btn-secondary btn-sm"
+                          title="Print patient confirmation / counter pickup slip"
+                        >
+                          <Printer size={14} /> Print Slip
+                        </button>
+                        <button
+                          onClick={() => {
+                            setStatusModalReq(r);
+                            setNewStatus(r.status === 'PENDING' ? 'CONFIRMED' : r.status);
+                            setPharmacyNotes(r.pharmacyNotes || '');
+                          }}
+                          className="btn btn-primary btn-sm"
+                        >
+                          Update Response / Status
+                        </button>
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                      <button
-                        type="button"
-                        onClick={() => printInquirySlip(r, { name: user?.pharmacyName })}
-                        className="btn btn-secondary btn-sm"
-                        title="Print patient confirmation / counter pickup slip"
-                      >
-                        <Printer size={14} /> Print Slip
-                      </button>
-                      <button
-                        onClick={() => {
-                          setStatusModalReq(r);
-                          setNewStatus(r.status === 'PENDING' ? 'CONFIRMED' : r.status);
-                          setPharmacyNotes(r.pharmacyNotes || '');
-                        }}
-                        className="btn btn-primary btn-sm"
-                      >
-                        Update Response / Status
-                      </button>
-                    </div>
+                    {r.customerNotes && (
+                      <div style={{
+                        backgroundColor: 'var(--bg-surface-secondary)',
+                        padding: '10px 14px',
+                        borderRadius: 'var(--radius-sm)',
+                        fontSize: '0.8125rem',
+                        marginTop: '12px',
+                      }}>
+                        <strong>Patient Note:</strong> {r.customerNotes}
+                      </div>
+                    )}
+
+                    {r.pharmacyNotes && (
+                      <div style={{
+                        backgroundColor: '#f0fdf4',
+                        border: '1px solid #bbf7d0',
+                        color: '#166534',
+                        padding: '10px 14px',
+                        borderRadius: 'var(--radius-sm)',
+                        fontSize: '0.8125rem',
+                        marginTop: '10px',
+                      }}>
+                        <strong>Your Pharmacy Response:</strong> {r.pharmacyNotes}
+                      </div>
+                    )}
                   </div>
-
-                  {r.customerNotes && (
-                    <div style={{
-                      backgroundColor: 'var(--bg-surface-secondary)',
-                      padding: '10px 14px',
-                      borderRadius: 'var(--radius-sm)',
-                      fontSize: '0.8125rem',
-                      marginTop: '12px',
-                    }}>
-                      <strong>Patient Note:</strong> {r.customerNotes}
-                    </div>
-                  )}
-
-                  {r.pharmacyNotes && (
-                    <div style={{
-                      backgroundColor: '#f0fdf4',
-                      border: '1px solid #bbf7d0',
-                      color: '#166534',
-                      padding: '10px 14px',
-                      borderRadius: 'var(--radius-sm)',
-                      fontSize: '0.8125rem',
-                      marginTop: '10px',
-                    }}>
-                      <strong>Your Pharmacy Response:</strong> {r.pharmacyNotes}
-                    </div>
-                  )}
-                </div>
-              ))}
+                );
+              })}
+              <Pagination
+                currentPage={requestsPage}
+                totalItems={requests.length}
+                pageSize={requestsPageSize}
+                onPageChange={setRequestsPage}
+                onPageSizeChange={(sz) => {
+                  setRequestsPageSize(sz);
+                  setRequestsPage(1);
+                }}
+                itemLabel="inquiries"
+                id="requests-pagination"
+              />
             </div>
           )}
         </div>
@@ -651,53 +766,77 @@ export default function PharmacyDashboard() {
             <div style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
               Immutable audit log capturing all stock quantity changes, reorder updates, and availability modifications for regulatory compliance.
             </div>
-            {auditLogs.length > 0 && (
-              <button
-                type="button"
-                onClick={() => exportAuditLogsCsv(auditLogs, user?.pharmacyName)}
-                className="btn btn-secondary btn-sm"
-                title="Download immutable audit trail as CSV spreadsheet"
-              >
-                <FileSpreadsheet size={15} /> Export Audit Log CSV
-              </button>
-            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <span className="badge badge-info" style={{ fontWeight: 600 }}>
+                {auditLogs.length} total rows
+              </span>
+              {auditLogs.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => exportAuditLogsCsv(auditLogs, user?.pharmacyName)}
+                  className="btn btn-secondary btn-sm"
+                  title="Download immutable audit trail as CSV spreadsheet"
+                >
+                  <FileSpreadsheet size={15} /> Export Audit Log CSV
+                </button>
+              )}
+            </div>
           </div>
           {auditLogs.length === 0 ? (
             <div className="card" style={{ textAlign: 'center', padding: '36px' }}>
               <p style={{ color: 'var(--text-secondary)' }}>No audit events logged yet.</p>
             </div>
           ) : (
-            <div className="table-responsive card" style={{ padding: 0 }}>
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Timestamp</th>
-                    <th>Action</th>
-                    <th>Medicine</th>
-                    <th>Change</th>
-                    <th>New Total</th>
-                    <th>Details</th>
-                    <th>User</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {auditLogs.map((log) => (
-                    <tr key={log.id}>
-                      <td style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        {log.createdAt ? new Date(log.createdAt).toLocaleString() : ''}
-                      </td>
-                      <td><code>{log.action}</code></td>
-                      <td><strong>{log.medicineName}</strong></td>
-                      <td style={{ color: log.quantityChange > 0 ? '#166534' : (log.quantityChange < 0 ? '#dc2626' : 'var(--text-main)') }}>
-                        {log.quantityChange > 0 ? `+${log.quantityChange}` : log.quantityChange}
-                      </td>
-                      <td>{log.newQuantity} units</td>
-                      <td style={{ fontSize: '0.8125rem' }}>{log.details}</td>
-                      <td style={{ fontSize: '0.8125rem' }}>{log.userName}</td>
+            <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+              <div className="table-responsive">
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th className="th-row-num">#</th>
+                      <th>Timestamp</th>
+                      <th>Action</th>
+                      <th>Medicine</th>
+                      <th>Change</th>
+                      <th>New Total</th>
+                      <th>Details</th>
+                      <th>User</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {paginatedAudit.map((log, index) => {
+                      const rowNum = (auditPageSize === 'All' ? 0 : (auditPage - 1) * auditPageSize) + index + 1;
+                      return (
+                        <tr key={log.id}>
+                          <td className="td-row-num">{rowNum}</td>
+                          <td style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                            {log.createdAt ? new Date(log.createdAt).toLocaleString() : ''}
+                          </td>
+                          <td><code>{log.action}</code></td>
+                          <td><strong>{log.medicineName}</strong></td>
+                          <td style={{ color: log.quantityChange > 0 ? '#166534' : (log.quantityChange < 0 ? '#dc2626' : 'var(--text-main)') }}>
+                            {log.quantityChange > 0 ? `+${log.quantityChange}` : log.quantityChange}
+                          </td>
+                          <td>{log.newQuantity} units</td>
+                          <td style={{ fontSize: '0.8125rem' }}>{log.details}</td>
+                          <td style={{ fontSize: '0.8125rem' }}>{log.userName}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <Pagination
+                currentPage={auditPage}
+                totalItems={auditLogs.length}
+                pageSize={auditPageSize}
+                onPageChange={setAuditPage}
+                onPageSizeChange={(sz) => {
+                  setAuditPageSize(sz);
+                  setAuditPage(1);
+                }}
+                itemLabel="audit logs"
+                id="audit-pagination"
+              />
             </div>
           )}
         </div>

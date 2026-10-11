@@ -6,6 +6,8 @@ import {
   XCircle, AlertCircle, RefreshCw
 } from 'lucide-react';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import Pagination from '../components/common/Pagination';
+import { paginateItems } from '../utils/paginationUtils';
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -14,6 +16,13 @@ export default function AdminDashboard() {
   const [overview, setOverview] = useState(null);
   const [pharmacies, setPharmacies] = useState([]);
   const [usersList, setUsersList] = useState([]);
+
+  // Pagination states
+  const [pharmaciesPage, setPharmaciesPage] = useState(1);
+  const [pharmaciesPageSize, setPharmaciesPageSize] = useState(10);
+  const [usersPage, setUsersPage] = useState(1);
+  const [usersPageSize, setUsersPageSize] = useState(10);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [actionSuccess, setActionSuccess] = useState(null);
@@ -229,100 +238,138 @@ export default function AdminDashboard() {
       {loading ? (
         <LoadingSpinner message="Loading administrative records..." />
       ) : activeTab === 'PHARMACIES' ? (
-        <div className="table-responsive card" style={{ padding: 0 }}>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Pharmacy Name</th>
-                <th>License Number</th>
-                <th>City &amp; Postal</th>
-                <th>Phone</th>
-                <th>Current Status</th>
-                <th style={{ textAlign: 'right' }}>Governance Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pharmacies.map((p) => (
-                <tr key={p.id}>
-                  <td>
-                    <strong>{p.name}</strong>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{p.email}</div>
-                  </td>
-                  <td><code>{p.licenseNumber}</code></td>
-                  <td>{p.city}, {p.postalCode}</td>
-                  <td>{p.phone}</td>
-                  <td>
-                    <span className={`badge ${
-                      p.status === 'APPROVED' ? 'badge-available' : (p.status === 'PENDING' ? 'badge-low' : 'badge-out')
-                    }`}>
-                      {p.status}
-                    </span>
-                  </td>
-                  <td style={{ textAlign: 'right' }}>
-                    <div style={{ display: 'inline-flex', gap: '6px' }}>
-                      {p.status !== 'APPROVED' && (
-                        <button
-                          onClick={() => handleApprovePharmacy(p.id)}
-                          className="btn btn-primary btn-sm"
-                        >
-                          <CheckCircle2 size={13} /> Approve
-                        </button>
-                      )}
-                      {p.status === 'APPROVED' && (
-                        <button
-                          onClick={() => handleSuspendPharmacy(p.id)}
-                          className="btn btn-secondary btn-sm"
-                          style={{ color: '#dc2626' }}
-                        >
-                          <XCircle size={13} /> Suspend
-                        </button>
-                      )}
-                    </div>
-                  </td>
+        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+          <div className="table-responsive">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th className="th-row-num">#</th>
+                  <th>Pharmacy Name</th>
+                  <th>License Number</th>
+                  <th>City &amp; Postal</th>
+                  <th>Phone</th>
+                  <th>Current Status</th>
+                  <th style={{ textAlign: 'right' }}>Governance Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {paginateItems(pharmacies, pharmaciesPage, pharmaciesPageSize).map((p, index) => {
+                  const rowNum = (pharmaciesPageSize === 'All' ? 0 : (pharmaciesPage - 1) * pharmaciesPageSize) + index + 1;
+                  return (
+                    <tr key={p.id}>
+                      <td className="td-row-num">{rowNum}</td>
+                      <td>
+                        <strong>{p.name}</strong>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{p.email}</div>
+                      </td>
+                      <td><code>{p.licenseNumber}</code></td>
+                      <td>{p.city}, {p.postalCode}</td>
+                      <td>{p.phone}</td>
+                      <td>
+                        <span className={`badge ${
+                          p.status === 'APPROVED' ? 'badge-available' : (p.status === 'PENDING' ? 'badge-low' : 'badge-out')
+                        }`}>
+                          {p.status}
+                        </span>
+                      </td>
+                      <td style={{ textAlign: 'right' }}>
+                        <div style={{ display: 'inline-flex', gap: '6px' }}>
+                          {p.status !== 'APPROVED' && (
+                            <button
+                              onClick={() => handleApprovePharmacy(p.id)}
+                              className="btn btn-primary btn-sm"
+                            >
+                              <CheckCircle2 size={13} /> Approve
+                            </button>
+                          )}
+                          {p.status === 'APPROVED' && (
+                            <button
+                              onClick={() => handleSuspendPharmacy(p.id)}
+                              className="btn btn-secondary btn-sm"
+                              style={{ color: '#dc2626' }}
+                            >
+                              <XCircle size={13} /> Suspend
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <Pagination
+            currentPage={pharmaciesPage}
+            totalItems={pharmacies.length}
+            pageSize={pharmaciesPageSize}
+            onPageChange={setPharmaciesPage}
+            onPageSizeChange={(sz) => {
+              setPharmaciesPageSize(sz);
+              setPharmaciesPage(1);
+            }}
+            itemLabel="pharmacies"
+            id="admin-pharmacies-pagination"
+          />
         </div>
       ) : (
-        <div className="table-responsive card" style={{ padding: 0 }}>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>User Name</th>
-                <th>Email Address</th>
-                <th>Phone</th>
-                <th>Role</th>
-                <th>Account Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {usersList.map((u) => (
-                <tr key={u.id}>
-                  <td><strong>{u.fullName}</strong></td>
-                  <td>{u.email}</td>
-                  <td>{u.phone}</td>
-                  <td>
-                    <span className={`badge ${
-                      u.role === 'SYSTEM_ADMIN' ? 'badge-out' : (u.role === 'PHARMACY_ADMIN' ? 'badge-info' : 'badge-available')
-                    }`}>
-                      {u.role}
-                    </span>
-                    {u.pharmacyName && (
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                        {u.pharmacyName}
-                      </div>
-                    )}
-                  </td>
-                  <td>
-                    <span className={`badge ${u.status === 'ACTIVE' ? 'badge-available' : 'badge-out'}`}>
-                      {u.status}
-                    </span>
-                  </td>
+        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+          <div className="table-responsive">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th className="th-row-num">#</th>
+                  <th>User Name</th>
+                  <th>Email Address</th>
+                  <th>Phone</th>
+                  <th>Role</th>
+                  <th>Account Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {paginateItems(usersList, usersPage, usersPageSize).map((u, index) => {
+                  const rowNum = (usersPageSize === 'All' ? 0 : (usersPage - 1) * usersPageSize) + index + 1;
+                  return (
+                    <tr key={u.id}>
+                      <td className="td-row-num">{rowNum}</td>
+                      <td><strong>{u.fullName}</strong></td>
+                      <td>{u.email}</td>
+                      <td>{u.phone}</td>
+                      <td>
+                        <span className={`badge ${
+                          u.role === 'SYSTEM_ADMIN' ? 'badge-out' : (u.role === 'PHARMACY_ADMIN' ? 'badge-info' : 'badge-available')
+                        }`}>
+                          {u.role}
+                        </span>
+                        {u.pharmacyName && (
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                            {u.pharmacyName}
+                          </div>
+                        )}
+                      </td>
+                      <td>
+                        <span className={`badge ${u.status === 'ACTIVE' ? 'badge-available' : 'badge-out'}`}>
+                          {u.status}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <Pagination
+            currentPage={usersPage}
+            totalItems={usersList.length}
+            pageSize={usersPageSize}
+            onPageChange={setUsersPage}
+            onPageSizeChange={(sz) => {
+              setUsersPageSize(sz);
+              setUsersPage(1);
+            }}
+            itemLabel="users"
+            id="admin-users-pagination"
+          />
         </div>
       )}
     </div>

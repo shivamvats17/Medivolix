@@ -36,7 +36,7 @@ export default function Home() {
             fontWeight: 600,
             marginBottom: '20px',
           }}>
-            <ShieldCheck size={16} /> Transparent Stock Discovery for Patients
+            <ShieldCheck size={16} /> Verified Medicine Network across Jaipur • Jodhpur • Delhi NCR
           </div>
 
           <h1 style={{
@@ -58,7 +58,7 @@ export default function Home() {
             maxWidth: '680px',
             margin: '0 auto 36px auto',
           }}>
-            Search participating pharmacies, check their latest reported stock status, and contact them to confirm availability before visiting.
+            Search participating pharmacies across Jaipur, Jodhpur, Delhi, Gurugram &amp; Noida. Check their latest reported stock status and confirm availability before visiting.
           </p>
 
           {/* Primary Search Bar */}
@@ -106,7 +106,7 @@ export default function Home() {
             fontSize: '0.8125rem',
             color: 'var(--text-muted)',
           }}>
-            <span>Sample searches:</span>
+            <span>Sample medicines:</span>
             {['Dolo 650', 'Augmentin 625', 'Azithral 500', 'Pan 40', 'Electral'].map((med) => (
               <button
                 key={med}
@@ -125,6 +125,23 @@ export default function Home() {
                 {med}
               </button>
             ))}
+          </div>
+
+          {/* Active Cities & Hubs */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            flexWrap: 'wrap',
+            marginTop: '12px',
+            fontSize: '0.75rem',
+            color: 'var(--text-secondary)',
+          }}>
+            <span style={{ fontWeight: 600 }}>Active Hubs:</span>
+            <span className="badge badge-success" style={{ fontSize: '0.75rem' }}>Jaipur (MI Road, Malviya Nagar, Raja Park)</span>
+            <span className="badge badge-success" style={{ fontSize: '0.75rem' }}>Jodhpur (MDM Hospital, Ratanada)</span>
+            <span className="badge badge-success" style={{ fontSize: '0.75rem' }}>Delhi NCR (CP, Lajpat Nagar, Noida, Gurugram)</span>
           </div>
         </div>
       </section>

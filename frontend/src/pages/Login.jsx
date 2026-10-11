@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LogIn, AlertCircle, Key, UserCheck, Building2, ShieldCheck } from 'lucide-react';
+import { AlertCircle, Key, UserCheck, Building2, ShieldCheck } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -48,22 +48,23 @@ export default function Login() {
     <div className="container" style={{ maxWidth: '460px', padding: '48px 16px' }}>
       <div className="card" style={{ padding: '36px' }}>
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-          <div style={{
-            width: '44px',
-            height: '44px',
-            backgroundColor: 'var(--primary-light)',
-            color: 'var(--primary)',
-            borderRadius: '8px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 12px auto',
-          }}>
-            <LogIn size={22} />
-          </div>
+          <img
+            src="/medivolix-logo.jpg"
+            alt="Medivolix"
+            style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '14px',
+              objectFit: 'cover',
+              margin: '0 auto 12px auto',
+              display: 'block',
+              boxShadow: '0 4px 12px rgba(14, 116, 144, 0.2)',
+              border: '1px solid var(--border-subtle)',
+            }}
+          />
           <h1 style={{ fontSize: '1.5rem', fontWeight: 800 }}>Account Login</h1>
           <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-            Access your patient inquiries or pharmacy inventory
+            Access verified pharmacy inventories in Jaipur, Jodhpur &amp; Delhi NCR
           </p>
         </div>
 
@@ -132,7 +133,7 @@ export default function Login() {
           fontSize: '0.8125rem',
         }}>
           <div style={{ fontWeight: 700, color: 'var(--text-main)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Key size={14} /> Evaluation Demonstration Accounts:
+            <Key size={14} /> Regional Demo Accounts (Jaipur / Jodhpur / Delhi):
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             <button
@@ -142,7 +143,7 @@ export default function Login() {
               style={{ justifyContent: 'flex-start', fontSize: '0.75rem' }}
             >
               <ShieldCheck size={13} style={{ color: '#dc2626' }} />
-              Admin (admin@medivolix.com)
+              Admin: Dr. Rajesh Sharma (admin@medivolix.com)
             </button>
             <button
               type="button"
@@ -151,7 +152,16 @@ export default function Login() {
               style={{ justifyContent: 'flex-start', fontSize: '0.75rem' }}
             >
               <Building2 size={13} style={{ color: 'var(--primary)' }} />
-              Pharmacy Admin (careplus@medivolix.com)
+              Jaipur Pharmacy: Manoj Gehlot (Apollo MI Rd)
+            </button>
+            <button
+              type="button"
+              onClick={() => handleQuickFill('apollo@medivolix.com', 'Pharmacy@1234')}
+              className="btn btn-secondary btn-sm"
+              style={{ justifyContent: 'flex-start', fontSize: '0.75rem' }}
+            >
+              <Building2 size={13} style={{ color: 'var(--primary)' }} />
+              Jodhpur Pharmacy: Suresh Bishnoi (Marwar Chemist)
             </button>
             <button
               type="button"
@@ -160,7 +170,25 @@ export default function Login() {
               style={{ justifyContent: 'flex-start', fontSize: '0.75rem' }}
             >
               <UserCheck size={13} style={{ color: 'var(--accent)' }} />
-              Customer (john.doe@example.com)
+              Jaipur Customer: Rahul Sharma
+            </button>
+            <button
+              type="button"
+              onClick={() => handleQuickFill('priya.sharma@example.com', 'Customer@1234')}
+              className="btn btn-secondary btn-sm"
+              style={{ justifyContent: 'flex-start', fontSize: '0.75rem' }}
+            >
+              <UserCheck size={13} style={{ color: 'var(--accent)' }} />
+              Jodhpur Customer: Priya Sharma
+            </button>
+            <button
+              type="button"
+              onClick={() => handleQuickFill('amit.patel@example.com', 'Customer@1234')}
+              className="btn btn-secondary btn-sm"
+              style={{ justifyContent: 'flex-start', fontSize: '0.75rem' }}
+            >
+              <UserCheck size={13} style={{ color: 'var(--accent)' }} />
+              Delhi Customer: Amit Patel
             </button>
           </div>
         </div>
