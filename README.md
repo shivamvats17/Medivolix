@@ -73,6 +73,7 @@ Medivolix/
 |   |   |   |-- TermsAndConditions.jsx# Platform limitations & operating terms
 |   |   |   |-- NotFound.jsx         # 404 error page
 |   |   |-- services/                # api.js, authService, medicineService, etc.
+|   |   |-- utils/                   # exportUtils.js (RFC 4180 CSV & printable clinical PDF slips)
 |   |   |-- context/                 # AuthContext (reactive user session state)
 |   |   |-- styles/                  # index.css (Healthcare design tokens)
 |   |   |-- App.jsx                  # React Router configuration
@@ -92,7 +93,7 @@ Medivolix/
 |   |   |   |   |-- model/           # User, Pharmacy, Medicine, Inventory, Batch, Request
 |   |   |   |   |-- dto/             # ApiResponse, LoginRequest, SearchResultDto, etc.
 |   |   |   |   |-- filter/          # CorsFilter, AuthFilter
-|   |   |   |   |-- util/            # JsonUtil, PasswordUtil (BCrypt), DistanceUtil
+|   |   |   |   |-- util/            # JsonUtil, PasswordUtil (BCrypt), DistanceUtil, CsvUtil
 |   |   |   |   |-- listener/        # AppContextListener (pool lifecycle)
 |   |   |   |   |-- MainApplication.java # 1-click embedded Tomcat 10.1 launcher
 |   |   |   |-- resources/
@@ -246,6 +247,7 @@ Medivolix includes a built-in interactive developer workbench and formal OpenAPI
 - [x] Production WAR file builds successfully (`target/medivolix.war`).
 - [x] Production React bundle builds successfully (`frontend/dist`).
 - [x] OpenAPI 3.0 specification and interactive REST API Explorer (`/api-docs`) implemented.
+- [x] RFC 4180 CSV data export and printable clinical PDF confirmation slips functional.
 - [x] Original SVG favicon loads and meta descriptions configured.
 - [x] Privacy Policy (`/privacy-policy`) and Terms and Conditions (`/terms-and-conditions`) available.
 - [x] Transparent freshness disclaimers implemented; no fake metrics or reviews.

@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { requestService } from '../services/requestService';
-import { ClipboardList, Building2, Phone, Search, AlertCircle, RefreshCw, XCircle, CheckCircle2 } from 'lucide-react';
+import { ClipboardList, Building2, Phone, Search, AlertCircle, RefreshCw, XCircle, CheckCircle2, Printer } from 'lucide-react';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import StatusBadge from '../components/common/StatusBadge';
+import { printInquirySlip } from '../utils/exportUtils';
 
 export default function UserDashboard() {
   const { user } = useAuth();
@@ -220,15 +221,26 @@ export default function UserDashboard() {
                   Submitted: {req.createdAt ? new Date(req.createdAt).toLocaleString() : 'Recently'}
                 </div>
 
-                {req.status === 'PENDING' && (
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                   <button
-                    onClick={() => handleCancelRequest(req.id)}
+                    type="button"
+                    onClick={() => printInquirySlip(req)}
                     className="btn btn-secondary btn-sm"
-                    style={{ fontSize: '0.75rem', color: '#dc2626' }}
+                    style={{ fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px' }}
+                    title="Print or Save confirmation slip as PDF"
                   >
-                    <XCircle size={13} /> Cancel Inquiry
+                    <Printer size={13} /> Print Slip (PDF)
                   </button>
-                )}
+                  {req.status === 'PENDING' && (
+                    <button
+                      onClick={() => handleCancelRequest(req.id)}
+                      className="btn btn-secondary btn-sm"
+                      style={{ fontSize: '0.75rem', color: '#dc2626' }}
+                    >
+                      <XCircle size={13} /> Cancel Inquiry
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           ))}

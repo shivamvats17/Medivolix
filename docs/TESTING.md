@@ -8,14 +8,15 @@ This report summarizes automated and manual test execution across the Medivolix 
 
 | Layer | Test Type | Status | Results |
 | :--- | :--- | :--- | :--- |
-| **Backend** | Unit Tests (JUnit 5) | Passed | 19/19 tests passed (0 failures, 0 errors across Distance, Validation, JSON, Password, Freshness, OpenAPI Spec) |
-| **Backend** | Maven Compilation | Passed | 49 source files compiled with 0 errors |
+| **Backend** | Unit Tests (JUnit 5) | Passed | 22/22 tests passed (0 failures, 0 errors across Distance, Validation, JSON, Password, Freshness, OpenAPI Spec, CSV Export) |
+| **Backend** | Maven Compilation | Passed | 50 source files compiled with 0 errors |
 | **Backend** | WAR Packaging | Passed | `target/medivolix.war` generated |
 | **Database** | Schema, Indexes & Seed | Passed | 9 tables, 10 catalog medicines, 7 users, backup/restore verified |
-| **Frontend** | Static Linting (Oxlint) | Passed | 33 files checked, 0 errors, 0 warnings |
-| **Frontend** | Production Build (Vite) | Passed | 1944 modules transformed, bundle in `dist/` |
+| **Frontend** | Static Linting (Oxlint) | Passed | 34 files checked, 0 errors, 0 warnings |
+| **Frontend** | Production Build (Vite) | Passed | 1945 modules transformed, bundle in `dist/` |
 | **Integration**| End-to-End Workflow API | Passed | 9/9 automated integration tests passed |
 | **API Explorer**| OpenAPI 3.0 & Explorer UI | Passed | Live interactive test workbench verified at `/api-docs` |
+| **Reporting**| CSV & Clinical PDF Slips | Passed | Inventory CSV, Expiry Audit PDF, and Patient Pickup Slips verified |
 | **Browser** | Browser Subagent E2E | Blocked | External environment Playwright 404 driver download limitation |
 
 ---

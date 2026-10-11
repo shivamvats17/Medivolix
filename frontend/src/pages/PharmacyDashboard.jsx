@@ -4,12 +4,19 @@ import { inventoryService } from '../services/inventoryService';
 import { medicineService } from '../services/medicineService';
 import {
   Building2, Plus, AlertTriangle, Calendar, ClipboardCheck, History,
-  Search, CheckCircle2, RefreshCw, AlertCircle, Edit
+  Search, CheckCircle2, RefreshCw, AlertCircle, Edit, Printer, FileSpreadsheet
 } from 'lucide-react';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import StatusBadge from '../components/common/StatusBadge';
 import FreshnessBadge from '../components/common/FreshnessBadge';
 import Modal from '../components/common/Modal';
+import {
+  exportInventoryCsv,
+  exportExpiringBatchesCsv,
+  exportAuditLogsCsv,
+  printBatchExpiryReport,
+  printInquirySlip
+} from '../utils/exportUtils';
 
 export default function PharmacyDashboard() {
   const { user } = useAuth();
@@ -303,8 +310,19 @@ export default function PharmacyDashboard() {
                 style={{ paddingLeft: '36px' }}
               />
             </div>
-            <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
-              Showing {filteredInventory.length} medicines
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <button
+                type="button"
+                onClick={() => exportInventoryCsv(filteredInventory, user?.pharmacyName)}
+                className="btn btn-secondary btn-sm"
+                title="Download inventory list as CSV spreadsheet"
+                disabled={filteredInventory.length === 0}
+              >
+                <FileSpreadsheet size={15} /> Export CSV
+              </button>
+              <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
+                Showing {filteredInventory.length} medicines
+              </div>
             </div>
           </div>
 
@@ -398,8 +416,19 @@ export default function PharmacyDashboard() {
       {/* Tab 2: Low Stock Alerts */}
       {activeTab === 'LOW_STOCK' && (
         <div>
-          <div style={{ marginBottom: '16px', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-            Medicines where reported stock is at or below the designated reorder threshold.
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
+            <div style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+              Medicines where reported stock is at or below the designated reorder threshold.
+            </div>
+            {lowStock.length > 0 && (
+              <button
+                type="button"
+                onClick={() => exportInventoryCsv(lowStock, `${user?.pharmacyName || 'pharmacy'}_low_stock`)}
+                className="btn btn-secondary btn-sm"
+              >
+                <FileSpreadsheet size={15} /> Export Low-Stock CSV
+              </button>
+            )}
           </div>
           {lowStock.length === 0 ? (
             <div className="card" style={{ textAlign: 'center', padding: '36px' }}>
@@ -457,8 +486,30 @@ export default function PharmacyDashboard() {
       {/* Tab 3: Expiry Tracking */}
       {activeTab === 'EXPIRY' && (
         <div>
-          <div style={{ marginBottom: '16px', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-            Batch-level monitoring flags stock batches expiring within 45 days. Expired stock is automatically quarantined from publicly reported availability.
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
+            <div style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+              Batch-level monitoring flags stock batches expiring within 45 days. Expired stock is automatically quarantined from publicly reported availability.
+            </div>
+            {expiringBatches.length > 0 && (
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => exportExpiringBatchesCsv(expiringBatches, user?.pharmacyName)}
+                  className="btn btn-secondary btn-sm"
+                  title="Download expiring batches as CSV spreadsheet"
+                >
+                  <FileSpreadsheet size={15} /> Export Batches CSV
+                </button>
+                <button
+                  type="button"
+                  onClick={() => printBatchExpiryReport({ name: user?.pharmacyName }, expiringBatches)}
+                  className="btn btn-primary btn-sm"
+                  title="Generate official printable Batch Expiry Audit Report"
+                >
+                  <Printer size={15} /> Print Audit Report (PDF)
+                </button>
+              </div>
+            )}
           </div>
           {expiringBatches.length === 0 ? (
             <div className="card" style={{ textAlign: 'center', padding: '36px' }}>
@@ -539,16 +590,26 @@ export default function PharmacyDashboard() {
                       </div>
                     </div>
 
-                    <button
-                      onClick={() => {
-                        setStatusModalReq(r);
-                        setNewStatus(r.status === 'PENDING' ? 'CONFIRMED' : r.status);
-                        setPharmacyNotes(r.pharmacyNotes || '');
-                      }}
-                      className="btn btn-primary btn-sm"
-                    >
-                      Update Response / Status
-                    </button>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <button
+                        type="button"
+                        onClick={() => printInquirySlip(r, { name: user?.pharmacyName })}
+                        className="btn btn-secondary btn-sm"
+                        title="Print patient confirmation / counter pickup slip"
+                      >
+                        <Printer size={14} /> Print Slip
+                      </button>
+                      <button
+                        onClick={() => {
+                          setStatusModalReq(r);
+                          setNewStatus(r.status === 'PENDING' ? 'CONFIRMED' : r.status);
+                          setPharmacyNotes(r.pharmacyNotes || '');
+                        }}
+                        className="btn btn-primary btn-sm"
+                      >
+                        Update Response / Status
+                      </button>
+                    </div>
                   </div>
 
                   {r.customerNotes && (
@@ -586,8 +647,20 @@ export default function PharmacyDashboard() {
       {/* Tab 5: Audit Log */}
       {activeTab === 'AUDIT' && (
         <div>
-          <div style={{ marginBottom: '16px', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-            Immutable audit log capturing all stock quantity changes, reorder updates, and availability modifications for regulatory compliance.
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
+            <div style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+              Immutable audit log capturing all stock quantity changes, reorder updates, and availability modifications for regulatory compliance.
+            </div>
+            {auditLogs.length > 0 && (
+              <button
+                type="button"
+                onClick={() => exportAuditLogsCsv(auditLogs, user?.pharmacyName)}
+                className="btn btn-secondary btn-sm"
+                title="Download immutable audit trail as CSV spreadsheet"
+              >
+                <FileSpreadsheet size={15} /> Export Audit Log CSV
+              </button>
+            )}
           </div>
           {auditLogs.length === 0 ? (
             <div className="card" style={{ textAlign: 'center', padding: '36px' }}>
