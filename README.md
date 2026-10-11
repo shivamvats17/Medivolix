@@ -212,14 +212,18 @@ All seed passwords are encrypted using BCrypt (`$2a$10$...`) in MySQL. For conve
    cd Medivolix\backend
    mvn test
    ```
-2. **Build Production WAR Package**:
+2. **Run Frontend Vitest Tests**:
+   ```powershell
+   cd Medivolix\frontend
+   npm test
+   ```
+3. **Build Production WAR Package**:
    ```powershell
    mvn clean package
    ```
    Generates `target/medivolix.war` for deployment to standalone Apache Tomcat 10.1 `webapps/`.
-3. **Build Frontend Production Bundle**:
+4. **Build Frontend Production Bundle**:
    ```powershell
-   cd Medivolix\frontend
    npm run build
    ```
    Compiles into `frontend/dist/`.
@@ -246,6 +250,7 @@ Medivolix includes a built-in interactive developer workbench and formal OpenAPI
 - [x] Cross-pharmacy access restrictions strictly enforced on the server.
 - [x] Production WAR file builds successfully (`target/medivolix.war`).
 - [x] Production React bundle builds successfully (`frontend/dist`).
+- [x] Automated Vitest frontend unit & component test suite (15/15 tests passing).
 - [x] OpenAPI 3.0 specification and interactive REST API Explorer (`/api-docs`) implemented.
 - [x] RFC 4180 CSV data export and printable clinical PDF confirmation slips functional.
 - [x] Original SVG favicon loads and meta descriptions configured.

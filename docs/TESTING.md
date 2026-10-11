@@ -12,7 +12,8 @@ This report summarizes automated and manual test execution across the Medivolix 
 | **Backend** | Maven Compilation | Passed | 50 source files compiled with 0 errors |
 | **Backend** | WAR Packaging | Passed | `target/medivolix.war` generated |
 | **Database** | Schema, Indexes & Seed | Passed | 9 tables, 10 catalog medicines, 7 users, backup/restore verified |
-| **Frontend** | Static Linting (Oxlint) | Passed | 34 files checked, 0 errors, 0 warnings |
+| **Frontend** | Unit & Component (Vitest) | Passed | 15/15 tests passed across 5 test suites (`exportUtils`, `StatusBadge`, `FreshnessBadge`, `Modal`, `Navbar`) |
+| **Frontend** | Static Linting (Oxlint) | Passed | 40 files checked, 0 errors, 0 warnings |
 | **Frontend** | Production Build (Vite) | Passed | 1945 modules transformed, bundle in `dist/` |
 | **Integration**| End-to-End Workflow API | Passed | 9/9 automated integration tests passed |
 | **API Explorer**| OpenAPI 3.0 & Explorer UI | Passed | Live interactive test workbench verified at `/api-docs` |
