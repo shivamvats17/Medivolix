@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Search, Building2, LogOut, ShieldCheck, ClipboardList, Menu, X, Code } from 'lucide-react';
+import ThemeToggle from './ThemeToggle';
 
 export default function Navbar() {
   const { user, isAuthenticated, isCustomer, isPharmacyAdmin, isSystemAdmin, logout } = useAuth();
@@ -15,12 +16,13 @@ export default function Navbar() {
 
   return (
     <header style={{
-      backgroundColor: '#ffffff',
+      backgroundColor: 'var(--bg-surface)',
       borderBottom: '1px solid var(--border-subtle)',
       position: 'sticky',
       top: 0,
       zIndex: 100,
     }}>
+
       <div className="container" style={{
         display: 'flex',
         alignItems: 'center',
@@ -163,35 +165,43 @@ export default function Navbar() {
               </Link>
             </div>
           )}
+
+          {/* Theme Switcher Toggle */}
+          <ThemeToggle />
         </nav>
 
-        {/* Mobile menu toggle */}
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: '8px',
-            color: 'var(--text-main)',
-          }}
-          className="mobile-toggle"
-          aria-label="Toggle navigation menu"
-        >
-          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+
+        {/* Mobile Actions: Theme Toggle & Menu Hamburger */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }} className="mobile-actions">
+          <ThemeToggle id="mobile-theme-toggle" />
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '8px',
+              color: 'var(--text-main)',
+            }}
+            className="mobile-toggle"
+            aria-label="Toggle navigation menu"
+          >
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Navigation Dropdown */}
       {mobileMenuOpen && (
         <div style={{
-          backgroundColor: '#ffffff',
+          backgroundColor: 'var(--bg-surface)',
           borderBottom: '1px solid var(--border-subtle)',
           padding: '16px 20px',
           display: 'flex',
           flexDirection: 'column',
           gap: '12px',
         }}>
+
           <Link
             to="/search"
             onClick={() => setMobileMenuOpen(false)}
@@ -269,8 +279,9 @@ export default function Navbar() {
       <style>{`
         @media (min-width: 768px) {
           .desktop-nav { display: flex !important; }
-          .mobile-toggle { display: none !important; }
+          .mobile-actions { display: none !important; }
         }
+
       `}</style>
     </header>
   );

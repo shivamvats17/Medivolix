@@ -103,4 +103,16 @@ public class AuthService {
         }
         return dto;
     }
+
+    public UserDto updateProfile(int userId, String fullName, String phone) throws IllegalArgumentException {
+        if (ValidationUtil.isBlank(fullName)) {
+            throw new IllegalArgumentException("Full name cannot be blank");
+        }
+        boolean updated = userRepository.updateProfile(userId, fullName.trim(), phone != null ? phone.trim() : "");
+        if (!updated) {
+            throw new RuntimeException("Could not update profile in database");
+        }
+        return getProfile(userId);
+    }
 }
+

@@ -20,4 +20,9 @@ export const authService = {
   async getMe() {
     return api.get('/auth/me');
   },
+
+  async updateProfile(data) {
+    return api.put('/auth/profile', data);
+  },
 };
+

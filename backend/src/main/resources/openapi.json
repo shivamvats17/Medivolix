@@ -186,6 +186,56 @@
         }
       }
     },
+    "/auth/profile": {
+      "put": {
+        "tags": ["Authentication"],
+        "summary": "Update authenticated user profile",
+        "description": "Updates full name and contact phone number for the currently authenticated user.",
+        "operationId": "updateProfile",
+        "security": [{ "cookieAuth": [] }, { "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["fullName"],
+                "properties": {
+                  "fullName": { "type": "string", "example": "Dr. Shivam Vats" },
+                  "phone": { "type": "string", "example": "+91 98765 43210" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile successfully updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserApiResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorApiResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorApiResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/medicines/search": {
       "get": {
         "tags": ["Medicines"],

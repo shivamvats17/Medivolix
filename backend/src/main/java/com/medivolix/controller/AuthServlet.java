@@ -2,6 +2,7 @@ package com.medivolix.controller;
 
 import com.medivolix.dto.LoginRequest;
 import com.medivolix.dto.RegisterRequest;
+import com.medivolix.dto.UpdateProfileRequest;
 import com.medivolix.dto.UserDto;
 import com.medivolix.service.AuthService;
 import jakarta.servlet.annotation.WebServlet;
@@ -43,10 +44,50 @@ public class AuthServlet extends BaseServlet {
             handleLogin(req, res);
         } else if ("/logout".equals(path)) {
             handleLogout(req, res);
+        } else if ("/profile".equals(path)) {
+            handleUpdateProfile(req, res);
         } else {
             sendError(res, HttpServletResponse.SC_NOT_FOUND, "Auth action not found");
         }
     }
+
+    @Override
+    protected void doPut(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        String path = req.getPathInfo();
+        if ("/profile".equals(path)) {
+            handleUpdateProfile(req, res);
+        } else {
+            sendError(res, HttpServletResponse.SC_NOT_FOUND, "Auth action not found");
+        }
+    }
+
+    private void handleUpdateProfile(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        UserDto currentUser = getAuthenticatedUser(req);
+        if (currentUser == null) {
+            sendError(res, HttpServletResponse.SC_UNAUTHORIZED, "Not authenticated");
+            return;
+        }
+
+        try {
+            UpdateProfileRequest updateReq = readJsonBody(req, UpdateProfileRequest.class);
+            if (updateReq == null || updateReq.getFullName() == null || updateReq.getFullName().trim().isEmpty()) {
+                sendError(res, HttpServletResponse.SC_BAD_REQUEST, "Full name is required");
+                return;
+            }
+
+            UserDto updatedUser = authService.updateProfile(currentUser.getId(), updateReq.getFullName(), updateReq.getPhone());
+            HttpSession session = req.getSession(false);
+            if (session != null) {
+                session.setAttribute("currentUser", updatedUser);
+            }
+            sendJson(res, HttpServletResponse.SC_OK, "Profile updated successfully", updatedUser);
+        } catch (IllegalArgumentException e) {
+            sendError(res, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+        } catch (Exception e) {
+            sendError(res, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to update profile: " + e.getMessage());
+        }
+    }
+
 
     private void handleRegister(HttpServletRequest req, HttpServletResponse res) throws IOException {
         try {

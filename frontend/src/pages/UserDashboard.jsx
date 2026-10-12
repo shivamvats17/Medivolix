@@ -2,21 +2,28 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { requestService } from '../services/requestService';
-import { ClipboardList, Building2, Phone, Search, AlertCircle, RefreshCw, XCircle, CheckCircle2, Printer } from 'lucide-react';
+import { ClipboardList, Building2, Phone, Search, AlertCircle, RefreshCw, XCircle, CheckCircle2, Printer, UserCheck } from 'lucide-react';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import StatusBadge from '../components/common/StatusBadge';
+import Modal from '../components/common/Modal';
 import Pagination from '../components/common/Pagination';
 import { paginateItems } from '../utils/paginationUtils';
 import { printInquirySlip } from '../utils/exportUtils';
 
 export default function UserDashboard() {
-  const { user } = useAuth();
+  const { user, updateProfile } = useAuth();
   const [requests, setRequests] = useState([]);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [actionMessage, setActionMessage] = useState(null);
+
+  const [showEditProfileModal, setShowEditProfileModal] = useState(false);
+  const [profileName, setProfileName] = useState(user?.fullName || '');
+  const [profilePhone, setProfilePhone] = useState(user?.phone || '');
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileError, setProfileError] = useState(null);
 
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
@@ -65,6 +72,33 @@ export default function UserDashboard() {
     }
   };
 
+  const handleOpenEditProfile = () => {
+    setProfileName(user?.fullName || '');
+    setProfilePhone(user?.phone || '');
+    setProfileError(null);
+    setShowEditProfileModal(true);
+  };
+
+  const handleSaveProfile = async (e) => {
+    e.preventDefault();
+    if (!profileName.trim()) {
+      setProfileError('Full name cannot be blank.');
+      return;
+    }
+    setProfileLoading(true);
+    setProfileError(null);
+    try {
+      await updateProfile({ fullName: profileName.trim(), phone: profilePhone.trim() });
+      setActionMessage('Profile updated successfully.');
+      setShowEditProfileModal(false);
+      setTimeout(() => setActionMessage(null), 4000);
+    } catch (err) {
+      setProfileError(err.message || 'Failed to update profile');
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
   return (
     <div className="container" style={{ padding: '32px 16px' }}>
       {/* Header Profile Banner */}
@@ -79,8 +113,16 @@ export default function UserDashboard() {
             </p>
           </div>
 
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <Link to="/search" className="btn btn-primary btn-sm">
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={handleOpenEditProfile}
+              className="btn btn-primary btn-sm"
+              data-testid="edit-user-profile-btn"
+            >
+              <UserCheck size={15} /> Edit Profile
+            </button>
+            <Link to="/search" className="btn btn-secondary btn-sm">
               <Search size={15} /> Search Medicines
             </Link>
             <button onClick={reloadRequests} className="btn btn-secondary btn-sm" title="Refresh list">
@@ -267,6 +309,70 @@ export default function UserDashboard() {
             id="user-requests-pagination"
           />
         </div>
+      )}
+
+      {/* Edit Customer Profile Modal */}
+      {showEditProfileModal && (
+        <Modal
+          isOpen={showEditProfileModal}
+          title="Edit My Profile"
+          onClose={() => setShowEditProfileModal(false)}
+        >
+          <form onSubmit={handleSaveProfile}>
+            {profileError && (
+              <div className="alert alert-error">
+                <AlertCircle size={16} /> {profileError}
+              </div>
+            )}
+
+            <div className="form-group">
+              <label className="form-label" htmlFor="user-full-name">Full Name</label>
+              <input
+                id="user-full-name"
+                type="text"
+                className="form-control"
+                value={profileName}
+                onChange={(e) => setProfileName(e.target.value)}
+                placeholder="e.g. Rahul Sharma"
+                required
+                autoFocus
+              />
+              <span className="form-hint">
+                Your full name appears on your inquiries and prescription request slips.
+              </span>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label" htmlFor="user-phone">Contact Phone Number</label>
+              <input
+                id="user-phone"
+                type="text"
+                className="form-control"
+                value={profilePhone}
+                onChange={(e) => setProfilePhone(e.target.value)}
+                placeholder="+91 98765 43210"
+              />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '24px' }}>
+              <button
+                type="button"
+                onClick={() => setShowEditProfileModal(false)}
+                className="btn btn-secondary"
+                disabled={profileLoading}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={profileLoading || !profileName.trim()}
+              >
+                {profileLoading ? 'Saving Changes...' : 'Save Profile Changes'}
+              </button>
+            </div>
+          </form>
+        </Modal>
       )}
     </div>
   );

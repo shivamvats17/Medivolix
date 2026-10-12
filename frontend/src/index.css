@@ -76,6 +76,65 @@
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
+/* ==============================================================================
+   DARK MODE PALETTE
+   High-contrast, eye-strain reducing dark theme for healthcare portals.
+   ============================================================================== */
+[data-theme="dark"],
+:root.dark {
+  /* Brand & Healthcare Accents */
+  --primary: #14b8a6;
+  --primary-hover: #2dd4bf;
+  --primary-light: #134e4a;
+  --primary-dark: #042f2e;
+  --accent: #38bdf8;
+  --accent-light: #075985;
+
+  /* Neutrals: Canvas & Grays */
+  --bg-page: #0b0f19;
+  --bg-surface: #111827;
+  --bg-surface-secondary: #1e293b;
+  --bg-card: #111827;
+
+  /* Typography Colors */
+  --text-main: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-inverse: #0b0f19;
+
+  /* Borders & Dividers */
+  --border-subtle: #1e293b;
+  --border-strong: #334155;
+  --border-focus: #14b8a6;
+
+  /* Status Colors */
+  --status-available-text: #4ade80;
+  --status-available-bg: rgba(34, 197, 94, 0.16);
+  --status-available-border: rgba(34, 197, 94, 0.35);
+
+  --status-low-text: #fb923c;
+  --status-low-bg: rgba(249, 115, 22, 0.16);
+  --status-low-border: rgba(249, 115, 22, 0.35);
+
+  --status-out-text: #f87171;
+  --status-out-bg: rgba(239, 68, 68, 0.16);
+  --status-out-border: rgba(239, 68, 68, 0.35);
+
+  --status-stale-text: #94a3b8;
+  --status-stale-bg: rgba(148, 163, 184, 0.16);
+  --status-stale-border: rgba(148, 163, 184, 0.35);
+
+  --status-info-text: #38bdf8;
+  --status-info-bg: rgba(56, 189, 248, 0.16);
+  --status-info-border: rgba(56, 189, 248, 0.35);
+
+  /* Shadows for dark canvas */
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.6), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.7), 0 4px 6px -4px rgba(0, 0, 0, 0.5);
+}
+
+
 /* Base Resets */
 *, *::before, *::after {
   box-sizing: border-box;

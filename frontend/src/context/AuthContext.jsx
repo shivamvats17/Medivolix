@@ -77,6 +77,13 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const updateProfile = async (profileData) => {
+    const updated = await authService.updateProfile(profileData);
+    setUser(updated);
+    localStorage.setItem('medivolix_user', JSON.stringify(updated));
+    return updated;
+  };
+
   const value = {
     user,
     loading,
@@ -88,7 +95,9 @@ export function AuthProvider({ children }) {
     register,
     logout,
     refreshUser,
+    updateProfile,
   };
+
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

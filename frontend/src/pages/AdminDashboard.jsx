@@ -3,14 +3,16 @@ import { useAuth } from '../context/AuthContext';
 import { adminService } from '../services/adminService';
 import {
   ShieldCheck, Building2, Users, CheckCircle2,
-  XCircle, AlertCircle, RefreshCw
+  XCircle, AlertCircle, RefreshCw, UserCheck
 } from 'lucide-react';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import Modal from '../components/common/Modal';
 import Pagination from '../components/common/Pagination';
 import { paginateItems } from '../utils/paginationUtils';
 
 export default function AdminDashboard() {
-  const { user } = useAuth();
+  const { user, updateProfile } = useAuth();
+
   const [activeTab, setActiveTab] = useState('PHARMACIES');
 
   const [overview, setOverview] = useState(null);
@@ -26,8 +28,14 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [actionSuccess, setActionSuccess] = useState(null);
+  const [showEditProfileModal, setShowEditProfileModal] = useState(false);
+  const [adminName, setAdminName] = useState(user?.fullName || '');
+  const [adminPhone, setAdminPhone] = useState(user?.phone || '');
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileError, setProfileError] = useState(null);
 
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+
 
   useEffect(() => {
     let ignore = false;
@@ -90,6 +98,34 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleOpenEditProfile = () => {
+    setAdminName(user?.fullName || '');
+    setAdminPhone(user?.phone || '');
+    setProfileError(null);
+    setShowEditProfileModal(true);
+  };
+
+  const handleSaveProfile = async (e) => {
+    e.preventDefault();
+    if (!adminName.trim()) {
+      setProfileError('Administrator name cannot be blank.');
+      return;
+    }
+    setProfileLoading(true);
+    setProfileError(null);
+    try {
+      await updateProfile({ fullName: adminName.trim(), phone: adminPhone.trim() });
+      setActionSuccess(`Administrator name successfully updated to "${adminName.trim()}".`);
+      setShowEditProfileModal(false);
+      reloadAdminData();
+      setTimeout(() => setActionSuccess(null), 4000);
+    } catch (err) {
+      setProfileError(err.message || 'Failed to update administrator profile');
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
   return (
     <div className="container" style={{ padding: '32px 16px' }}>
       {/* Admin Header */}
@@ -107,10 +143,21 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <button onClick={reloadAdminData} className="btn btn-secondary btn-sm">
-            <RefreshCw size={15} /> Refresh Metrics
-          </button>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={handleOpenEditProfile}
+              className="btn btn-primary btn-sm"
+              data-testid="edit-admin-profile-btn"
+            >
+              <UserCheck size={15} /> Edit Admin Profile
+            </button>
+            <button onClick={reloadAdminData} className="btn btn-secondary btn-sm">
+              <RefreshCw size={15} /> Refresh Metrics
+            </button>
+          </div>
         </div>
+
 
         {/* Real Operational Metrics Cards */}
         {overview && (
@@ -372,6 +419,71 @@ export default function AdminDashboard() {
           />
         </div>
       )}
+
+      {/* Edit Administrator Profile Modal */}
+      {showEditProfileModal && (
+        <Modal
+          isOpen={showEditProfileModal}
+          title="Edit Administrator Profile"
+          onClose={() => setShowEditProfileModal(false)}
+        >
+          <form onSubmit={handleSaveProfile}>
+            {profileError && (
+              <div className="alert alert-error">
+                <AlertCircle size={16} /> {profileError}
+              </div>
+            )}
+
+            <div className="form-group">
+              <label className="form-label" htmlFor="admin-full-name">Administrator Full Name</label>
+              <input
+                id="admin-full-name"
+                type="text"
+                className="form-control"
+                value={adminName}
+                onChange={(e) => setAdminName(e.target.value)}
+                placeholder="e.g. Shivam Vats"
+                required
+                autoFocus
+              />
+              <span className="form-hint">
+                This name is displayed in the navigation bar, governance audit logs, and account profile.
+              </span>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label" htmlFor="admin-phone">Contact Phone Number</label>
+              <input
+                id="admin-phone"
+                type="text"
+                className="form-control"
+                value={adminPhone}
+                onChange={(e) => setAdminPhone(e.target.value)}
+                placeholder="+91 98290 00001"
+              />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '24px' }}>
+              <button
+                type="button"
+                onClick={() => setShowEditProfileModal(false)}
+                className="btn btn-secondary"
+                disabled={profileLoading}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={profileLoading || !adminName.trim()}
+              >
+                {profileLoading ? 'Saving Changes...' : 'Save Profile Changes'}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
     </div>
   );
 }
+

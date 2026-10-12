@@ -87,6 +87,33 @@ paths:
         "401":
           description: Unauthorized
 
+  /auth/profile:
+    put:
+      tags: [Authentication]
+      summary: Update authenticated user profile
+      description: Update user full name and phone number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [fullName]
+              properties:
+                fullName:
+                  type: string
+                  example: Dr. Shivam Vats
+                phone:
+                  type: string
+                  example: "+91 98765 43210"
+      responses:
+        "200":
+          description: Profile updated successfully
+        "400":
+          description: Validation error
+        "401":
+          description: Unauthorized
+
   /medicines/search:
     get:
       tags: [Medicines]

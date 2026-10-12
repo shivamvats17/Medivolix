@@ -100,6 +100,21 @@ public class UserRepository {
         }
     }
 
+    public boolean updateProfile(int userId, String fullName, String phone) {
+        String sql = "UPDATE users SET full_name = ?, phone = ?, updated_at = NOW() WHERE id = ?";
+        try (Connection con = DatabaseConfig.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, fullName.trim());
+            ps.setString(2, phone != null ? phone.trim() : "");
+            ps.setInt(3, userId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("[UserRepository] Error updating user profile: " + e.getMessage());
+            return false;
+        }
+    }
+
+
     private User mapRowToUser(ResultSet rs) throws SQLException {
         User user = new User();
         user.setId(rs.getInt("id"));

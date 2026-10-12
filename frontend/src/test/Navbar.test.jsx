@@ -4,6 +4,7 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Navbar from '../components/common/Navbar';
 import * as AuthContext from '../context/AuthContext';
+import { ThemeProvider } from '../context/ThemeContext';
 
 describe('Navbar', () => {
   it('renders brand wordmark and default public navigation links', () => {
@@ -17,10 +18,13 @@ describe('Navbar', () => {
     });
 
     render(
-      <MemoryRouter>
-        <Navbar />
-      </MemoryRouter>
+      <ThemeProvider>
+        <MemoryRouter>
+          <Navbar />
+        </MemoryRouter>
+      </ThemeProvider>
     );
+
 
     expect(screen.getByText('Medivolix')).toBeInTheDocument();
     expect(screen.getByText('Search Medicines')).toBeInTheDocument();
@@ -38,10 +42,13 @@ describe('Navbar', () => {
     });
 
     render(
-      <MemoryRouter>
-        <Navbar />
-      </MemoryRouter>
+      <ThemeProvider>
+        <MemoryRouter>
+          <Navbar />
+        </MemoryRouter>
+      </ThemeProvider>
     );
+
 
     expect(screen.getByText('Pharmacy Portal')).toBeInTheDocument();
     expect(screen.getByText('Ramesh Rao')).toBeInTheDocument();
