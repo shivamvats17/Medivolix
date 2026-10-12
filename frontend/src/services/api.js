@@ -1,10 +1,21 @@
 // Centralized API client for Medivolix
 // Connects to Core Java Servlets backend via /api or configured VITE_API_BASE_URL.
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+function getBaseUrl() {
+  let base = import.meta.env.VITE_API_BASE_URL || '/api';
+  base = base.trim().replace(/\/+$/, '');
+  // If base is a full URL like "http://localhost:8080" without /api, ensure /api is appended
+  if (base.startsWith('http') && !base.endsWith('/api')) {
+    base = `${base}/api`;
+  }
+  return base || '/api';
+}
+
+const BASE_URL = getBaseUrl();
 
 export async function request(endpoint, options = {}) {
-  const url = `${BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const url = `${BASE_URL}${cleanEndpoint}`;
 
   const defaultHeaders = {
     'Accept': 'application/json',
@@ -49,7 +60,15 @@ export async function request(endpoint, options = {}) {
       try {
         data = JSON.parse(text);
       } catch {
-        data = { message: text };
+        if (!text || text.trim().startsWith('<')) {
+          data = {
+            message: response.status === 404
+              ? 'Requested API endpoint not found (HTTP 404). Please ensure the backend is running and the endpoint is mapped.'
+              : `Backend returned HTTP ${response.status} (${response.statusText || 'Error'})`,
+          };
+        } else {
+          data = { message: text };
+        }
       }
     }
 

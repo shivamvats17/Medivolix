@@ -54,12 +54,13 @@ public class AuthFilter implements Filter {
         req.setAttribute("currentUser", currentUser);
 
         // Role-based authorization rules
-        if (path.startsWith("/api/admin")) {
+        String normalizedPath = path.startsWith("/api") ? path.substring(4) : path;
+        if (normalizedPath.startsWith("/admin")) {
             if (!User.Role.SYSTEM_ADMIN.name().equals(currentUser.getRole())) {
                 sendJsonError(res, HttpServletResponse.SC_FORBIDDEN, "Access denied. System Administrator role required.");
                 return;
             }
-        } else if (path.startsWith("/api/pharmacy")) {
+        } else if (normalizedPath.startsWith("/pharmacy")) {
             if (!User.Role.PHARMACY_ADMIN.name().equals(currentUser.getRole()) &&
                 !User.Role.SYSTEM_ADMIN.name().equals(currentUser.getRole())) {
                 sendJsonError(res, HttpServletResponse.SC_FORBIDDEN, "Access denied. Pharmacy Administrator role required.");
@@ -75,14 +76,15 @@ public class AuthFilter implements Filter {
     }
 
     private boolean isPublicRoute(String path) {
-        return path.startsWith("/api/auth/login") ||
-               path.startsWith("/api/auth/register") ||
-               path.startsWith("/api/auth/logout") ||
-               path.startsWith("/api/medicines") ||
-               path.startsWith("/api/health") ||
-               path.startsWith("/api/openapi.json") ||
-               path.startsWith("/api/system") ||
-               (path.startsWith("/api/pharmacies") && !path.contains("/admin/"));
+        String cleanPath = path.startsWith("/api") ? path.substring(4) : path;
+        return cleanPath.startsWith("/auth/login") ||
+               cleanPath.startsWith("/auth/register") ||
+               cleanPath.startsWith("/auth/logout") ||
+               cleanPath.startsWith("/medicines") ||
+               cleanPath.startsWith("/health") ||
+               cleanPath.startsWith("/openapi.json") ||
+               cleanPath.startsWith("/system") ||
+               (cleanPath.startsWith("/pharmacies") && !cleanPath.contains("/admin/"));
     }
 
     private UserDto resolveUser(HttpServletRequest req) {

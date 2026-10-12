@@ -125,7 +125,8 @@ public class AuthServlet extends BaseServlet {
         } catch (SecurityException e) {
             sendError(res, HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
         } catch (Exception e) {
-            sendError(res, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Login processing failed");
+            e.printStackTrace();
+            sendError(res, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Login processing failed: " + e.getMessage());
         }
     }
 

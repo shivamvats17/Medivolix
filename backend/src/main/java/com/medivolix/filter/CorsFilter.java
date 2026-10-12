@@ -42,6 +42,14 @@ public class CorsFilter implements Filter {
     }
 
     private boolean isOriginAllowed(String origin) {
+        if (origin == null) return true;
+        String cleanOrigin = origin.trim().toLowerCase();
+        if (cleanOrigin.startsWith("http://localhost:") ||
+            cleanOrigin.startsWith("http://127.0.0.1:") ||
+            cleanOrigin.equals("http://localhost") ||
+            cleanOrigin.equals("http://127.0.0.1")) {
+            return true;
+        }
         if (allowedOrigins == null || allowedOrigins.length == 0) return true;
         return Arrays.stream(allowedOrigins).anyMatch(allowed -> allowed.trim().equalsIgnoreCase(origin.trim()));
     }
