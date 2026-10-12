@@ -23,18 +23,30 @@ export default function Footer() {
           {/* Column 1: Brand & Purpose */}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-              <img
-                src="/medivolix-logo.jpg"
-                alt="Medivolix Logo"
-                style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '8px',
-                  objectFit: 'contain',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                }}
-              />
+              <div style={{
+                width: '38px',
+                height: '38px',
+                borderRadius: '8px',
+                backgroundColor: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '2px',
+                boxShadow: '0 2px 10px rgba(0,0,0,0.35)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                flexShrink: 0,
+              }}>
+                <img
+                  src="/medivolix-icon.png"
+                  alt="Medivolix Logo"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain',
+                    display: 'block',
+                  }}
+                />
+              </div>
               <div>
                 <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.02em', display: 'block', lineHeight: 1.15 }}>
                   Medivolix

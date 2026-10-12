@@ -1,14 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
   <defs>
-    <linearGradient id="medGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0f766e" />
+    <linearGradient id="crossGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00c4cc" />
       <stop offset="100%" stop-color="#0d9488" />
     </linearGradient>
   </defs>
-  <!-- Background Shield / Hex Base -->
-  <rect x="4" y="4" width="40" height="40" rx="10" fill="url(#medGrad)" />
-  
-  <!-- Stylized M & Heartbeat / Pulse Nodes -->
-  <path d="M14 34V16L24 28L34 16V34" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
-  <circle cx="24" cy="14" r="3" fill="#34d399" />
+  <rect width="64" height="64" rx="14" fill="#ffffff" />
+  <!-- Medical Cross with Rounded Corners -->
+  <path d="M25 9h14a4 4 0 0 1 4 4v9h9a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4h-9v9a4 4 0 0 1-4 4H25a4 4 0 0 1-4-4v-9h-9a4 4 0 0 1-4-4v-8a4 4 0 0 1 4-4h9v-9a4 4 0 0 1 4-4z"
+        fill="none" stroke="url(#crossGrad)" stroke-width="4.5" stroke-linejoin="round" />
+  <!-- Heartbeat ECG Pulse & Pill Capsule in horizontal center -->
+  <path d="M12 31h11l3-10 5 20 4-10h18" fill="none" stroke="url(#crossGrad)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
 </svg>

@@ -48,20 +48,30 @@ export default function Login() {
     <div className="container" style={{ maxWidth: '460px', padding: '48px 16px' }}>
       <div className="card" style={{ padding: '36px' }}>
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-          <img
-            src="/medivolix-logo.jpg"
-            alt="Medivolix"
-            style={{
-              width: '64px',
-              height: '64px',
-              borderRadius: '14px',
-              objectFit: 'cover',
-              margin: '0 auto 12px auto',
-              display: 'block',
-              boxShadow: '0 4px 12px rgba(14, 116, 144, 0.2)',
-              border: '1px solid var(--border-subtle)',
-            }}
-          />
+          <div style={{
+            width: '68px',
+            height: '68px',
+            borderRadius: '16px',
+            backgroundColor: '#ffffff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 16px auto',
+            boxShadow: '0 8px 24px rgba(13, 148, 136, 0.22)',
+            border: '1.5px solid rgba(13, 148, 136, 0.2)',
+            padding: '4px',
+          }}>
+            <img
+              src="/medivolix-icon.png"
+              alt="Medivolix"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                display: 'block',
+              }}
+            />
+          </div>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 800 }}>Account Login</h1>
           <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
             Access verified pharmacy inventories in Jaipur, Jodhpur &amp; Delhi NCR

@@ -772,3 +772,20 @@ a:hover {
   }
 }
 
+/* Brand Logo Badge */
+.navbar-logo-badge {
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.navbar-logo-badge:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.28) !important;
+}
+
+[data-theme='dark'] .navbar-logo-badge {
+  background-color: #ffffff !important;
+  border-color: rgba(45, 212, 191, 0.45) !important;
+  box-shadow: 0 0 16px rgba(45, 212, 191, 0.35) !important;
+}
+
+

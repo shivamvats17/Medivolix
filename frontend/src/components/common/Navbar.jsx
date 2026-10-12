@@ -36,18 +36,31 @@ export default function Navbar() {
           gap: '12px',
           textDecoration: 'none',
         }}>
-          <img
-            src="/medivolix-logo.jpg"
-            alt="Medivolix Brand Logo"
-            style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '8px',
-              objectFit: 'cover',
-              border: '1px solid var(--border-subtle)',
-              boxShadow: 'var(--shadow-sm)',
-            }}
-          />
+          <div className="navbar-logo-badge" style={{
+            width: '44px',
+            height: '44px',
+            borderRadius: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#ffffff',
+            border: '1.5px solid rgba(13, 148, 136, 0.25)',
+            boxShadow: '0 2px 10px rgba(13, 148, 136, 0.18)',
+            flexShrink: 0,
+            overflow: 'hidden',
+            padding: '2px',
+          }}>
+            <img
+              src="/medivolix-icon.png"
+              alt="Medivolix Brand Emblem"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                display: 'block',
+              }}
+            />
+          </div>
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <span style={{
               fontSize: '1.375rem',
