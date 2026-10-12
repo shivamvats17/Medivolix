@@ -80,6 +80,11 @@ public class MainApplication {
         Tomcat.addServlet(ctx, "AdminServlet", new AdminServlet());
         ctx.addServletMappingDecoded("/api/admin/*", "AdminServlet");
 
+        Tomcat.addServlet(ctx, "SystemServlet", new SystemServlet());
+        ctx.addServletMappingDecoded("/api/health", "SystemServlet");
+        ctx.addServletMappingDecoded("/api/openapi.json", "SystemServlet");
+        ctx.addServletMappingDecoded("/api/system/*", "SystemServlet");
+
         System.out.println("===============================================================");
         System.out.println("  MEDIVOLIX BACKEND SERVER (Apache Tomcat 10.1 / Jakarta Servlets)");
         System.out.println("===============================================================");
