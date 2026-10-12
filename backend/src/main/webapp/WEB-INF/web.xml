@@ -45,7 +45,9 @@
     <servlet-mapping>
         <servlet-name>AuthServlet</servlet-name>
         <url-pattern>/api/auth/*</url-pattern>
+        <url-pattern>/api/auth</url-pattern>
         <url-pattern>/auth/*</url-pattern>
+        <url-pattern>/auth</url-pattern>
     </servlet-mapping>
 
     <servlet>
@@ -55,7 +57,9 @@
     <servlet-mapping>
         <servlet-name>MedicineServlet</servlet-name>
         <url-pattern>/api/medicines/*</url-pattern>
+        <url-pattern>/api/medicines</url-pattern>
         <url-pattern>/medicines/*</url-pattern>
+        <url-pattern>/medicines</url-pattern>
     </servlet-mapping>
 
     <servlet>
@@ -65,7 +69,9 @@
     <servlet-mapping>
         <servlet-name>PharmacyServlet</servlet-name>
         <url-pattern>/api/pharmacies/*</url-pattern>
+        <url-pattern>/api/pharmacies</url-pattern>
         <url-pattern>/pharmacies/*</url-pattern>
+        <url-pattern>/pharmacies</url-pattern>
     </servlet-mapping>
 
     <servlet>
@@ -75,7 +81,9 @@
     <servlet-mapping>
         <servlet-name>AvailabilityRequestServlet</servlet-name>
         <url-pattern>/api/availability-requests/*</url-pattern>
+        <url-pattern>/api/availability-requests</url-pattern>
         <url-pattern>/availability-requests/*</url-pattern>
+        <url-pattern>/availability-requests</url-pattern>
     </servlet-mapping>
 
     <servlet>
@@ -85,7 +93,9 @@
     <servlet-mapping>
         <servlet-name>PharmacyInventoryServlet</servlet-name>
         <url-pattern>/api/pharmacy/inventory/*</url-pattern>
+        <url-pattern>/api/pharmacy/inventory</url-pattern>
         <url-pattern>/pharmacy/inventory/*</url-pattern>
+        <url-pattern>/pharmacy/inventory</url-pattern>
     </servlet-mapping>
 
     <servlet>
@@ -95,7 +105,9 @@
     <servlet-mapping>
         <servlet-name>PharmacyRequestServlet</servlet-name>
         <url-pattern>/api/pharmacy/requests/*</url-pattern>
+        <url-pattern>/api/pharmacy/requests</url-pattern>
         <url-pattern>/pharmacy/requests/*</url-pattern>
+        <url-pattern>/pharmacy/requests</url-pattern>
     </servlet-mapping>
 
     <servlet>
@@ -105,7 +117,9 @@
     <servlet-mapping>
         <servlet-name>AdminServlet</servlet-name>
         <url-pattern>/api/admin/*</url-pattern>
+        <url-pattern>/api/admin</url-pattern>
         <url-pattern>/admin/*</url-pattern>
+        <url-pattern>/admin</url-pattern>
     </servlet-mapping>
 
     <servlet>

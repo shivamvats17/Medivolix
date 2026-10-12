@@ -20,7 +20,10 @@ public class AuthServlet extends BaseServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
         String path = req.getPathInfo();
-        if ("/me".equals(path)) {
+        String[] parts = getPathParts(req);
+        String action = parts.length > 0 ? parts[0].toLowerCase() : (path != null ? path.replaceFirst("^/", "").toLowerCase() : "");
+
+        if ("me".equals(action)) {
             UserDto user = getAuthenticatedUser(req);
             if (user != null) {
                 // Refresh profile to get updated pharmacy bindings or role changes
@@ -37,14 +40,16 @@ public class AuthServlet extends BaseServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException {
         String path = req.getPathInfo();
+        String[] parts = getPathParts(req);
+        String action = parts.length > 0 ? parts[0].toLowerCase() : (path != null ? path.replaceFirst("^/", "").toLowerCase() : "");
 
-        if ("/register".equals(path)) {
+        if ("register".equals(action)) {
             handleRegister(req, res);
-        } else if ("/login".equals(path)) {
+        } else if ("login".equals(action)) {
             handleLogin(req, res);
-        } else if ("/logout".equals(path)) {
+        } else if ("logout".equals(action)) {
             handleLogout(req, res);
-        } else if ("/profile".equals(path)) {
+        } else if ("profile".equals(action)) {
             handleUpdateProfile(req, res);
         } else {
             sendError(res, HttpServletResponse.SC_NOT_FOUND, "Auth action not found");
@@ -54,7 +59,10 @@ public class AuthServlet extends BaseServlet {
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse res) throws IOException {
         String path = req.getPathInfo();
-        if ("/profile".equals(path)) {
+        String[] parts = getPathParts(req);
+        String action = parts.length > 0 ? parts[0].toLowerCase() : (path != null ? path.replaceFirst("^/", "").toLowerCase() : "");
+
+        if ("profile".equals(action)) {
             handleUpdateProfile(req, res);
         } else {
             sendError(res, HttpServletResponse.SC_NOT_FOUND, "Auth action not found");

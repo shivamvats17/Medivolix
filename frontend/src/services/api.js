@@ -73,7 +73,16 @@ export async function request(endpoint, options = {}) {
     }
 
     if (!response.ok) {
-      const errorMessage = data?.message || `Request failed with status ${response.status}`;
+      let errorMessage = data?.message;
+      if (!errorMessage) {
+        if (response.status === 404) {
+          errorMessage = 'The requested resource or API endpoint was not found (HTTP 404). Please ensure the backend server is running.';
+        } else if (response.status === 502 || response.status === 503 || response.status === 504) {
+          errorMessage = 'The Medivolix backend server is unreachable. Please ensure the backend is running on port 8080.';
+        } else {
+          errorMessage = `Request failed with status ${response.status}${response.statusText ? ` (${response.statusText})` : ''}`;
+        }
+      }
       const error = new Error(errorMessage);
       error.status = response.status;
       error.data = data;

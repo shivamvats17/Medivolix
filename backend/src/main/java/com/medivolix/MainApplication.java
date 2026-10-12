@@ -61,31 +61,45 @@ public class MainApplication {
         // 4. Register Jakarta Servlets
         Tomcat.addServlet(ctx, "AuthServlet", new AuthServlet());
         ctx.addServletMappingDecoded("/api/auth/*", "AuthServlet");
+        ctx.addServletMappingDecoded("/api/auth", "AuthServlet");
         ctx.addServletMappingDecoded("/auth/*", "AuthServlet");
+        ctx.addServletMappingDecoded("/auth", "AuthServlet");
 
         Tomcat.addServlet(ctx, "MedicineServlet", new MedicineServlet());
         ctx.addServletMappingDecoded("/api/medicines/*", "MedicineServlet");
+        ctx.addServletMappingDecoded("/api/medicines", "MedicineServlet");
         ctx.addServletMappingDecoded("/medicines/*", "MedicineServlet");
+        ctx.addServletMappingDecoded("/medicines", "MedicineServlet");
 
         Tomcat.addServlet(ctx, "PharmacyServlet", new PharmacyServlet());
         ctx.addServletMappingDecoded("/api/pharmacies/*", "PharmacyServlet");
+        ctx.addServletMappingDecoded("/api/pharmacies", "PharmacyServlet");
         ctx.addServletMappingDecoded("/pharmacies/*", "PharmacyServlet");
+        ctx.addServletMappingDecoded("/pharmacies", "PharmacyServlet");
 
         Tomcat.addServlet(ctx, "AvailabilityRequestServlet", new AvailabilityRequestServlet());
         ctx.addServletMappingDecoded("/api/availability-requests/*", "AvailabilityRequestServlet");
+        ctx.addServletMappingDecoded("/api/availability-requests", "AvailabilityRequestServlet");
         ctx.addServletMappingDecoded("/availability-requests/*", "AvailabilityRequestServlet");
+        ctx.addServletMappingDecoded("/availability-requests", "AvailabilityRequestServlet");
 
         Tomcat.addServlet(ctx, "PharmacyInventoryServlet", new PharmacyInventoryServlet());
         ctx.addServletMappingDecoded("/api/pharmacy/inventory/*", "PharmacyInventoryServlet");
+        ctx.addServletMappingDecoded("/api/pharmacy/inventory", "PharmacyInventoryServlet");
         ctx.addServletMappingDecoded("/pharmacy/inventory/*", "PharmacyInventoryServlet");
+        ctx.addServletMappingDecoded("/pharmacy/inventory", "PharmacyInventoryServlet");
 
         Tomcat.addServlet(ctx, "PharmacyRequestServlet", new PharmacyRequestServlet());
         ctx.addServletMappingDecoded("/api/pharmacy/requests/*", "PharmacyRequestServlet");
+        ctx.addServletMappingDecoded("/api/pharmacy/requests", "PharmacyRequestServlet");
         ctx.addServletMappingDecoded("/pharmacy/requests/*", "PharmacyRequestServlet");
+        ctx.addServletMappingDecoded("/pharmacy/requests", "PharmacyRequestServlet");
 
         Tomcat.addServlet(ctx, "AdminServlet", new AdminServlet());
         ctx.addServletMappingDecoded("/api/admin/*", "AdminServlet");
+        ctx.addServletMappingDecoded("/api/admin", "AdminServlet");
         ctx.addServletMappingDecoded("/admin/*", "AdminServlet");
+        ctx.addServletMappingDecoded("/admin", "AdminServlet");
 
         Tomcat.addServlet(ctx, "SystemServlet", new SystemServlet());
         ctx.addServletMappingDecoded("/api/health", "SystemServlet");

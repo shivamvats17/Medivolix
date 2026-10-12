@@ -28,6 +28,7 @@ export default function SearchMedicines() {
 
   // Filter option: 'ALL', 'AVAILABLE_ONLY', 'OTC', 'RX'
   const [filterType, setFilterType] = useState('ALL');
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     let ignore = false;
@@ -57,7 +58,7 @@ export default function SearchMedicines() {
     return () => {
       ignore = true;
     };
-  }, [initialQuery, userLocation]);
+  }, [initialQuery, userLocation, retryCount]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -231,8 +232,18 @@ export default function SearchMedicines() {
       {loading ? (
         <LoadingSpinner message="Searching medicine catalog and checking pharmacy stock records..." />
       ) : error ? (
-        <div className="alert alert-error" style={{ marginTop: '20px' }}>
-          <AlertCircle size={18} /> {error}
+        <div className="alert alert-error" style={{ marginTop: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <AlertCircle size={18} style={{ flexShrink: 0 }} />
+            <span>{error}</span>
+          </div>
+          <button
+            onClick={() => setRetryCount((c) => c + 1)}
+            className="btn btn-sm btn-secondary"
+            style={{ padding: '6px 14px', fontSize: '0.85rem' }}
+          >
+            Retry Search
+          </button>
         </div>
       ) : filteredResults.length === 0 ? (
         <div className="card" style={{ textAlign: 'center', padding: '48px 24px', marginTop: '20px' }}>
