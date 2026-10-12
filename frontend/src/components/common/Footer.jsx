@@ -35,9 +35,14 @@ export default function Footer() {
                   border: '1px solid rgba(255,255,255,0.15)',
                 }}
               />
-              <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.02em' }}>
-                Medivolix
-              </span>
+              <div>
+                <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.02em', display: 'block', lineHeight: 1.15 }}>
+                  Medivolix
+                </span>
+                <span style={{ fontSize: '0.725rem', color: '#2dd4bf', fontStyle: 'italic', fontWeight: 600, display: 'block', marginTop: '2px' }}>
+                  The Right Medicine, Near You.
+                </span>
+              </div>
             </div>
             <p style={{ fontSize: '0.875rem', color: '#94a3b8', lineHeight: 1.6 }}>
               Community medicine availability platform across Jaipur, Jodhpur, Delhi NCR, and nearby regions. Enabling patients to locate stock across licensed pharmacies and confirm before travelling.

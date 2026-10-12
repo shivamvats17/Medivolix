@@ -48,25 +48,18 @@ export default function Navbar() {
               boxShadow: 'var(--shadow-sm)',
             }}
           />
-          <div>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <span style={{
               fontSize: '1.375rem',
               fontWeight: 800,
               color: 'var(--text-main)',
-              letterSpacing: '-0.02em',
+              letterSpacing: '-0.025em',
+              lineHeight: 1.15,
             }}>
               Medivolix
             </span>
-            <span style={{
-              display: 'block',
-              fontSize: '0.6875rem',
-              color: 'var(--text-muted)',
-              fontWeight: 500,
-              letterSpacing: '0.04em',
-              textTransform: 'uppercase',
-              marginTop: '-2px',
-            }}>
-              Medicine Finder
+            <span className="navbar-brand-tagline">
+              The Right Medicine, Near You.
             </span>
           </div>
         </Link>

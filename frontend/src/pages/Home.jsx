@@ -44,11 +44,21 @@ export default function Home() {
             fontWeight: 800,
             color: 'var(--text-main)',
             lineHeight: 1.2,
-            marginBottom: '16px',
+            marginBottom: '10px',
             letterSpacing: '-0.025em',
           }}>
             Find medicines at nearby pharmacies.
           </h1>
+
+          <div style={{
+            fontSize: '1.125rem',
+            fontStyle: 'italic',
+            fontWeight: 600,
+            color: 'var(--primary)',
+            marginBottom: '18px',
+          }}>
+            The Right Medicine, Near You.
+          </div>
 
           <p style={{
             fontSize: '1.125rem',

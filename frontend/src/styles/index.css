@@ -753,3 +753,22 @@ a:hover {
   font-size: 0.75rem;
   font-weight: 600;
 }
+
+/* Brand Tagline in Navbar & Footers */
+.navbar-brand-tagline {
+  font-family: var(--font-family);
+  font-style: italic;
+  font-weight: 600;
+  font-size: 0.725rem;
+  color: var(--primary);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  transition: color var(--transition-fast);
+}
+
+@media (max-width: 440px) {
+  .navbar-brand-tagline {
+    font-size: 0.65rem;
+  }
+}
+
