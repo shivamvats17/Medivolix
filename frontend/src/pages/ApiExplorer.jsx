@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useTheme } from '../context/ThemeContext';
 import {
   Code,
   Play,
@@ -512,6 +513,7 @@ const AUTH_PRESETS = [
 ];
 
 export default function ApiExplorer() {
+  const { isDark } = useTheme();
   const [selectedTag, setSelectedTag] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeEndpointId, setActiveEndpointId] = useState(ENDPOINTS[0].id);
@@ -685,31 +687,51 @@ export default function ApiExplorer() {
   const getMethodBadge = (method) => {
     switch (method) {
       case 'GET':
-        return { bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe' };
+        return isDark
+          ? { bg: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa', border: 'rgba(59, 130, 246, 0.35)' }
+          : { bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe' };
       case 'POST':
-        return { bg: '#ecfdf5', color: '#047857', border: '#a7f3d0' };
+        return isDark
+          ? { bg: 'rgba(16, 185, 129, 0.2)', color: '#34d399', border: 'rgba(16, 185, 129, 0.35)' }
+          : { bg: '#ecfdf5', color: '#047857', border: '#a7f3d0' };
       case 'PUT':
       case 'PATCH':
-        return { bg: '#fffbeb', color: '#b45309', border: '#fde68a' };
+        return isDark
+          ? { bg: 'rgba(245, 158, 11, 0.2)', color: '#fbbf24', border: 'rgba(245, 158, 11, 0.35)' }
+          : { bg: '#fffbeb', color: '#b45309', border: '#fde68a' };
       case 'DELETE':
-        return { bg: '#fef2f2', color: '#b91c1c', border: '#fecaca' };
+        return isDark
+          ? { bg: 'rgba(239, 68, 68, 0.2)', color: '#f87171', border: 'rgba(239, 68, 68, 0.35)' }
+          : { bg: '#fef2f2', color: '#b91c1c', border: '#fecaca' };
       default:
-        return { bg: '#f1f5f9', color: '#475569', border: '#cbd5e1' };
+        return isDark
+          ? { bg: 'rgba(148, 163, 184, 0.2)', color: '#cbd5e1', border: 'rgba(148, 163, 184, 0.35)' }
+          : { bg: '#f1f5f9', color: '#475569', border: '#cbd5e1' };
     }
   };
 
   const getAuthBadge = (auth) => {
     switch (auth) {
       case 'PUBLIC':
-        return { label: 'Public', bg: '#f0fdf4', color: '#15803d', icon: Globe };
+        return isDark
+          ? { label: 'Public', bg: 'rgba(34, 197, 94, 0.2)', color: '#4ade80', icon: Globe }
+          : { label: 'Public', bg: '#f0fdf4', color: '#15803d', icon: Globe };
       case 'CUSTOMER':
-        return { label: 'Customer', bg: '#eff6ff', color: '#1d4ed8', icon: Lock };
+        return isDark
+          ? { label: 'Customer', bg: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa', icon: Lock }
+          : { label: 'Customer', bg: '#eff6ff', color: '#1d4ed8', icon: Lock };
       case 'PHARMACY_ADMIN':
-        return { label: 'Pharmacy Admin', bg: '#fef3c7', color: '#92400e', icon: Lock };
+        return isDark
+          ? { label: 'Pharmacy Admin', bg: 'rgba(245, 158, 11, 0.2)', color: '#fbbf24', icon: Lock }
+          : { label: 'Pharmacy Admin', bg: '#fef3c7', color: '#92400e', icon: Lock };
       case 'SYSTEM_ADMIN':
-        return { label: 'System Admin', bg: '#fee2e2', color: '#991b1b', icon: Shield };
+        return isDark
+          ? { label: 'System Admin', bg: 'rgba(239, 68, 68, 0.2)', color: '#f87171', icon: Shield }
+          : { label: 'System Admin', bg: '#fee2e2', color: '#991b1b', icon: Shield };
       default:
-        return { label: 'Auth Required', bg: '#f1f5f9', color: '#475569', icon: Lock };
+        return isDark
+          ? { label: 'Auth Required', bg: 'rgba(148, 163, 184, 0.2)', color: '#cbd5e1', icon: Lock }
+          : { label: 'Auth Required', bg: '#f1f5f9', color: '#475569', icon: Lock };
     }
   };
 
@@ -721,7 +743,7 @@ export default function ApiExplorer() {
       <div className="container">
         {/* Header Section */}
         <div style={{
-          backgroundColor: '#ffffff',
+          backgroundColor: 'var(--bg-surface)',
           borderRadius: 'var(--radius-lg)',
           border: '1px solid var(--border-subtle)',
           padding: '28px',
@@ -895,7 +917,7 @@ export default function ApiExplorer() {
         }}>
           {/* Left Column: Navigation, Search, and Endpoint List */}
           <div style={{
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--bg-surface)',
             borderRadius: 'var(--radius-lg)',
             border: '1px solid var(--border-subtle)',
             padding: '20px',
@@ -915,7 +937,8 @@ export default function ApiExplorer() {
                   fontSize: '0.875rem',
                   borderRadius: 'var(--radius-sm)',
                   border: '1px solid var(--border-strong)',
-                  backgroundColor: '#f8fafc'
+                  backgroundColor: 'var(--bg-surface-secondary)',
+                  color: 'var(--text-main)',
                 }}
               />
             </div>
@@ -942,7 +965,7 @@ export default function ApiExplorer() {
                     borderRadius: 'var(--radius-sm)',
                     border: '1px solid',
                     borderColor: selectedTag === tag ? 'var(--primary)' : 'var(--border-subtle)',
-                    backgroundColor: selectedTag === tag ? 'var(--primary-light)' : '#ffffff',
+                    backgroundColor: selectedTag === tag ? 'var(--primary-light)' : 'var(--bg-surface-secondary)',
                     color: selectedTag === tag ? 'var(--primary-dark)' : 'var(--text-secondary)',
                     cursor: 'pointer'
                   }}
@@ -976,7 +999,7 @@ export default function ApiExplorer() {
                         padding: '10px 12px',
                         borderRadius: 'var(--radius-md)',
                         cursor: 'pointer',
-                        backgroundColor: isSelected ? '#f0fdfa' : '#ffffff',
+                        backgroundColor: isSelected ? (isDark ? 'rgba(20, 184, 166, 0.16)' : '#f0fdfa') : 'var(--bg-surface)',
                         border: `1px solid ${isSelected ? 'var(--primary)' : 'var(--border-subtle)'}`,
                         transition: 'all 0.15s ease'
                       }}
@@ -1024,7 +1047,7 @@ export default function ApiExplorer() {
 
           {/* Right Column: Active Endpoint Workbench */}
           <div style={{
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--bg-surface)',
             borderRadius: 'var(--radius-lg)',
             border: '1px solid var(--border-subtle)',
             padding: '28px',
@@ -1240,14 +1263,14 @@ export default function ApiExplorer() {
               <div style={{
                 borderRadius: 'var(--radius-lg)',
                 border: '1px solid var(--border-subtle)',
-                backgroundColor: '#f8fafc',
+                backgroundColor: 'var(--bg-surface-secondary)',
                 overflow: 'hidden',
                 marginBottom: '28px'
               }}>
                 {/* Response Status Bar */}
                 <div style={{
                   padding: '12px 16px',
-                  backgroundColor: '#ffffff',
+                  backgroundColor: 'var(--bg-surface)',
                   borderBottom: '1px solid var(--border-subtle)',
                   display: 'flex',
                   alignItems: 'center',
@@ -1261,9 +1284,9 @@ export default function ApiExplorer() {
                       fontSize: '0.8125rem',
                       padding: '4px 10px',
                       borderRadius: 'var(--radius-sm)',
-                      backgroundColor: responseStatus.ok ? '#dcfce7' : '#fee2e2',
-                      color: responseStatus.ok ? '#166534' : '#991b1b',
-                      border: `1px solid ${responseStatus.ok ? '#bbf7d0' : '#fecaca'}`,
+                      backgroundColor: responseStatus.ok ? (isDark ? 'rgba(34, 197, 94, 0.2)' : '#dcfce7') : (isDark ? 'rgba(239, 68, 68, 0.2)' : '#fee2e2'),
+                      color: responseStatus.ok ? (isDark ? '#4ade80' : '#166534') : (isDark ? '#f87171' : '#991b1b'),
+                      border: `1px solid ${responseStatus.ok ? (isDark ? 'rgba(74, 222, 128, 0.35)' : '#bbf7d0') : (isDark ? 'rgba(248, 113, 113, 0.35)' : '#fecaca')}`,
                       fontFamily: 'var(--font-mono)'
                     }}>
                       {responseStatus.code} {responseStatus.statusText}
@@ -1291,8 +1314,8 @@ export default function ApiExplorer() {
                           padding: '4px 10px',
                           fontSize: '0.75rem',
                           fontWeight: responseTab === 'body' ? 700 : 500,
-                          backgroundColor: responseTab === 'body' ? 'var(--primary)' : '#ffffff',
-                          color: responseTab === 'body' ? '#ffffff' : 'var(--text-main)',
+                          backgroundColor: responseTab === 'body' ? 'var(--primary)' : 'var(--bg-surface-secondary)',
+                          color: responseTab === 'body' ? (isDark ? '#042f2e' : '#ffffff') : 'var(--text-main)',
                           border: 'none',
                           cursor: 'pointer'
                         }}
@@ -1306,8 +1329,8 @@ export default function ApiExplorer() {
                           padding: '4px 10px',
                           fontSize: '0.75rem',
                           fontWeight: responseTab === 'headers' ? 700 : 500,
-                          backgroundColor: responseTab === 'headers' ? 'var(--primary)' : '#ffffff',
-                          color: responseTab === 'headers' ? '#ffffff' : 'var(--text-main)',
+                          backgroundColor: responseTab === 'headers' ? 'var(--primary)' : 'var(--bg-surface-secondary)',
+                          color: responseTab === 'headers' ? (isDark ? '#042f2e' : '#ffffff') : 'var(--text-main)',
                           border: 'none',
                           cursor: 'pointer'
                         }}

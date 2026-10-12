@@ -243,11 +243,11 @@ export default function UserDashboard() {
                   )}
                   {req.pharmacyNotes && (
                     <div style={{
-                      backgroundColor: req.status === 'CONFIRMED' ? '#f0fdf4' : '#f8fafc',
+                      backgroundColor: req.status === 'CONFIRMED' ? 'var(--status-available-bg)' : 'var(--bg-surface-secondary)',
                       padding: '8px 12px',
                       borderRadius: 'var(--radius-sm)',
-                      border: req.status === 'CONFIRMED' ? '1px solid #bbf7d0' : '1px solid #cbd5e1',
-                      color: req.status === 'CONFIRMED' ? '#166534' : 'var(--text-main)',
+                      border: req.status === 'CONFIRMED' ? '1px solid var(--status-available-border)' : '1px solid var(--border-subtle)',
+                      color: req.status === 'CONFIRMED' ? 'var(--status-available-text)' : 'var(--text-main)',
                     }}>
                       <strong>Pharmacy Response:</strong> {req.pharmacyNotes}
                     </div>

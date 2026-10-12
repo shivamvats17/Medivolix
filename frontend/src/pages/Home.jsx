@@ -19,7 +19,7 @@ export default function Home() {
     <div>
       {/* Hero Section */}
       <section style={{
-        backgroundColor: '#ffffff',
+        backgroundColor: 'var(--bg-surface)',
         borderBottom: '1px solid var(--border-subtle)',
         padding: '64px 0 56px 0',
       }}>
@@ -67,7 +67,7 @@ export default function Home() {
             gap: '10px',
             maxWidth: '620px',
             margin: '0 auto',
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--bg-surface)',
             padding: '6px',
             borderRadius: 'var(--radius-md)',
             border: '2px solid var(--primary)',
@@ -88,6 +88,7 @@ export default function Home() {
                 padding: '12px 10px',
                 fontSize: '1rem',
                 flex: 1,
+                backgroundColor: 'transparent',
               }}
             />
             <button type="submit" className="btn btn-primary btn-lg" style={{ padding: '0 24px' }}>
@@ -113,12 +114,13 @@ export default function Home() {
                 type="button"
                 onClick={() => navigate(`/search?q=${encodeURIComponent(med)}`)}
                 style={{
-                  background: 'none',
+                  background: 'var(--bg-surface-secondary)',
                   border: '1px solid var(--border-subtle)',
                   borderRadius: 'var(--radius-sm)',
                   padding: '3px 8px',
                   color: 'var(--primary)',
                   fontSize: '0.8125rem',
+                  fontWeight: 600,
                   cursor: 'pointer',
                 }}
               >
@@ -139,15 +141,15 @@ export default function Home() {
             color: 'var(--text-secondary)',
           }}>
             <span style={{ fontWeight: 600 }}>Active Hubs:</span>
-            <span className="badge badge-success" style={{ fontSize: '0.75rem' }}>Jaipur (MI Road, Malviya Nagar, Raja Park)</span>
-            <span className="badge badge-success" style={{ fontSize: '0.75rem' }}>Jodhpur (MDM Hospital, Ratanada)</span>
-            <span className="badge badge-success" style={{ fontSize: '0.75rem' }}>Delhi NCR (CP, Lajpat Nagar, Noida, Gurugram)</span>
+            <span className="badge badge-available" style={{ fontSize: '0.75rem' }}>Jaipur (MI Road, Malviya Nagar, Raja Park)</span>
+            <span className="badge badge-available" style={{ fontSize: '0.75rem' }}>Jodhpur (MDM Hospital, Ratanada)</span>
+            <span className="badge badge-available" style={{ fontSize: '0.75rem' }}>Delhi NCR (CP, Lajpat Nagar, Noida, Gurugram)</span>
           </div>
         </div>
       </section>
 
       {/* Transparency Disclaimer Notice */}
-      <section style={{ backgroundColor: '#f8fafc', padding: '16px 0', borderBottom: '1px solid var(--border-subtle)' }}>
+      <section style={{ backgroundColor: 'var(--bg-page)', padding: '16px 0', borderBottom: '1px solid var(--border-subtle)' }}>
         <div className="container">
           <div className="disclaimer-banner" style={{ margin: 0 }}>
             <AlertTriangle size={18} style={{ color: 'var(--primary)', flexShrink: 0, marginTop: '2px' }} />
@@ -159,7 +161,7 @@ export default function Home() {
       </section>
 
       {/* 3-Step How It Works Section */}
-      <section style={{ padding: '64px 0', backgroundColor: '#ffffff', borderBottom: '1px solid var(--border-subtle)' }}>
+      <section style={{ padding: '64px 0', backgroundColor: 'var(--bg-surface)', borderBottom: '1px solid var(--border-subtle)' }}>
         <div className="container">
           <div style={{ textAlign: 'center', marginBottom: '48px' }}>
             <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '12px' }}>
@@ -222,12 +224,12 @@ export default function Home() {
             </div>
 
             {/* Step 3 */}
-            <div className="card" style={{ textAlign: 'left', borderTop: '4px solid #059669' }}>
+            <div className="card" style={{ textAlign: 'left', borderTop: '4px solid var(--status-available-text)' }}>
               <div style={{
                 width: '40px',
                 height: '40px',
-                backgroundColor: '#d1fae5',
-                color: '#059669',
+                backgroundColor: 'var(--status-available-bg)',
+                color: 'var(--status-available-text)',
                 borderRadius: 'var(--radius-md)',
                 display: 'flex',
                 alignItems: 'center',
