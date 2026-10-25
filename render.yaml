@@ -15,7 +15,7 @@ services:
     dockerContext: ./backend
     plan: free
     region: oregon
-    healthCheckPath: /api/health
+    healthCheckPath: /api/openapi.json
     envVars:
       - key: PORT
         value: "8080"

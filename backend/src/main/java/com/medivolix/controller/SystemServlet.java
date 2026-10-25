@@ -48,23 +48,46 @@ public class SystemServlet extends BaseServlet {
         healthData.put("status", "UP");
         healthData.put("timestamp", Instant.now().toEpochMilli());
 
-        // 1. Database Connectivity Diagnostics
+        // 1. Database Connectivity Diagnostics (Bounded to 1.5s so health checks never hang)
         Map<String, Object> dbData = new HashMap<>();
-        long start = System.currentTimeMillis();
         boolean dbHealthy = false;
         String dbError = null;
 
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            dbHealthy = conn.isValid(2);
-            long latency = System.currentTimeMillis() - start;
-            dbData.put("status", dbHealthy ? "UP" : "DOWN");
-            dbData.put("latencyMs", latency);
-            dbData.put("poolName", "MedivolixHikariPool");
-            dbData.put("databaseProduct", conn.getMetaData().getDatabaseProductName());
+        java.util.concurrent.CompletableFuture<Map<String, Object>> dbCheckFuture = 
+            java.util.concurrent.CompletableFuture.supplyAsync(() -> {
+                Map<String, Object> data = new HashMap<>();
+                long start = System.currentTimeMillis();
+                try (Connection conn = DatabaseConfig.getConnection()) {
+                    boolean healthy = conn.isValid(1);
+                    long latency = System.currentTimeMillis() - start;
+                    data.put("status", healthy ? "UP" : "DOWN");
+                    data.put("latencyMs", latency);
+                    data.put("poolName", "MedivolixHikariPool");
+                    data.put("databaseProduct", conn.getMetaData().getDatabaseProductName());
+                    data.put("healthy", healthy);
+                } catch (Exception e) {
+                    data.put("status", "DOWN");
+                    data.put("error", e.getMessage());
+                    data.put("healthy", false);
+                }
+                return data;
+            });
+
+        try {
+            dbData = dbCheckFuture.get(1500, java.util.concurrent.TimeUnit.MILLISECONDS);
+            dbHealthy = Boolean.TRUE.equals(dbData.get("healthy"));
+            dbError = (String) dbData.get("error");
+        } catch (java.util.concurrent.TimeoutException te) {
+            dbData.put("status", "DOWN");
+            dbData.put("error", "Database connection probe timed out (>1500ms)");
+            dbCheckFuture.cancel(true);
+            dbHealthy = false;
+            dbError = "Connection probe timed out";
         } catch (Exception e) {
             dbData.put("status", "DOWN");
+            dbData.put("error", e.getMessage());
+            dbHealthy = false;
             dbError = e.getMessage();
-            dbData.put("error", dbError);
         }
         healthData.put("database", dbData);
 
