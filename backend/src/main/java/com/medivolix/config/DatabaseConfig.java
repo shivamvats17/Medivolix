@@ -31,6 +31,7 @@ public class DatabaseConfig {
             config.setMinimumIdle(AppConfig.getInt("db.pool.minimumIdle", 2));
             config.setIdleTimeout(AppConfig.getInt("db.pool.idleTimeout", 30000));
             config.setConnectionTimeout(AppConfig.getInt("db.pool.connectionTimeout", 20000));
+            config.setInitializationFailTimeout(-1); // Don't fail container boot; retry connecting in background
             config.setPoolName("MedivolixHikariPool");
 
             // Recommended MySQL JDBC connection pool properties
