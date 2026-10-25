@@ -47,7 +47,8 @@ public class CorsFilter implements Filter {
         if (cleanOrigin.startsWith("http://localhost:") ||
             cleanOrigin.startsWith("http://127.0.0.1:") ||
             cleanOrigin.equals("http://localhost") ||
-            cleanOrigin.equals("http://127.0.0.1")) {
+            cleanOrigin.equals("http://127.0.0.1") ||
+            cleanOrigin.endsWith(".onrender.com")) {
             return true;
         }
         if (allowedOrigins == null || allowedOrigins.length == 0) return true;

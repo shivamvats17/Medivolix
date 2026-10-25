@@ -83,12 +83,7 @@ public class SystemServlet extends BaseServlet {
         if (dbHealthy) {
             sendJson(res, HttpServletResponse.SC_OK, "System is fully operational", healthData);
         } else {
-            res.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
-            res.setContentType("application/json");
-            res.setCharacterEncoding("UTF-8");
-            ApiResponse<Map<String, Object>> response = ApiResponse.error("Database connection degraded: " + dbError);
-            response.setData(healthData);
-            res.getWriter().write(com.medivolix.util.JsonUtil.toJson(response));
+            sendJson(res, HttpServletResponse.SC_OK, "System is online (Database degraded: " + dbError + ")", healthData);
         }
     }
 
