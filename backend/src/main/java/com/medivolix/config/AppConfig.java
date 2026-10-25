@@ -22,20 +22,36 @@ public class AppConfig {
     }
 
     public static String get(String key, String defaultValue) {
-        // First check System environment variables (e.g., DB_URL for db.url)
+        // 1. Direct uppercase key (e.g., db.url -> DB_URL, server.port -> SERVER_PORT)
         String envKey = key.replace('.', '_').toUpperCase();
         String envVal = System.getenv(envKey);
         if (envVal != null && !envVal.trim().isEmpty()) {
             return envVal.trim();
         }
 
-        // Then check JVM system properties
+        // 2. Snake_case conversion (e.g., cors.allowedOrigins -> CORS_ALLOWED_ORIGINS, app.stockFreshnessHours -> APP_STOCK_FRESHNESS_HOURS)
+        String snakeKey = key.replaceAll("([a-z])([A-Z])", "$1_$2").replace('.', '_').toUpperCase();
+        envVal = System.getenv(snakeKey);
+        if (envVal != null && !envVal.trim().isEmpty()) {
+            return envVal.trim();
+        }
+
+        // 3. Shortened key without namespace prefix (e.g., app.stockFreshnessHours -> STOCK_FRESHNESS_HOURS)
+        if (snakeKey.contains("_")) {
+            String shortKey = snakeKey.substring(snakeKey.indexOf('_') + 1);
+            envVal = System.getenv(shortKey);
+            if (envVal != null && !envVal.trim().isEmpty()) {
+                return envVal.trim();
+            }
+        }
+
+        // 4. Check JVM system properties
         String sysProp = System.getProperty(key);
         if (sysProp != null && !sysProp.trim().isEmpty()) {
             return sysProp.trim();
         }
 
-        // Fallback to loaded properties
+        // 5. Fallback to loaded properties
         return properties.getProperty(key, defaultValue);
     }
 

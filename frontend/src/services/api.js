@@ -4,7 +4,11 @@
 function getBaseUrl() {
   let base = import.meta.env.VITE_API_BASE_URL || '/api';
   base = base.trim().replace(/\/+$/, '');
-  // If base is a full URL like "http://localhost:8080" without /api, ensure /api is appended
+  // If base is a bare hostname (e.g. from Render's host property: medivolix-backend.onrender.com), prefix https://
+  if (base && !base.startsWith('http://') && !base.startsWith('https://') && !base.startsWith('/') && base.includes('.')) {
+    base = `https://${base}`;
+  }
+  // If base is a full URL without /api, ensure /api is appended
   if (base.startsWith('http') && !base.endsWith('/api')) {
     base = `${base}/api`;
   }
