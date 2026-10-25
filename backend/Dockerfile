@@ -41,4 +41,6 @@ ENV DB_URL="jdbc:mysql://db:3306/medivolix_db?useSSL=false&allowPublicKeyRetriev
 
 EXPOSE 8080
 
-CMD ["catalina.sh", "run"]
+# Disable internal shutdown port (8005) to prevent health-check conflicts,
+# and dynamically bind HTTP connector to $PORT (Render standard)
+CMD ["sh", "-c", "sed -i 's/port=\"8005\"/port=\"-1\"/' /usr/local/tomcat/conf/server.xml && sed -i \"s/port=\\\"8080\\\"/port=\\\"${PORT:-8080}\\\"/\" /usr/local/tomcat/conf/server.xml && exec catalina.sh run"]
