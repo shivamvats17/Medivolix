@@ -22,11 +22,9 @@ services:
 
       - key: DB_URL
         value: "jdbc:mysql://YOUR_MYSQL_HOST:3306/medivolix_db?useSSL=true&requireSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8"
-        sync: false
 
       - key: DB_USER
         value: "root"
-        sync: false
 
       - key: DB_PASSWORD
         sync: false
