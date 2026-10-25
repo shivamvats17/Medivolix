@@ -47,7 +47,7 @@ services:
   # Frontend SPA (React 19 / Vite / React Router DOM v7)
   # Matches keys and values from frontend/.env
   # ----------------------------------------------------------------------------
-  - type: static
+  - type: web
     name: medivolix-frontend
     runtime: static
     rootDir: frontend
@@ -59,7 +59,4 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_BASE_URL
-        fromService:
-          type: web
-          name: medivolix-backend
-          property: host
+        value: https://medivolix-backend.onrender.com/api
